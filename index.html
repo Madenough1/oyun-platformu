@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>🎮 Oyun Platformu</title>
+ <style>
+ * {
+ box-sizing: border-box;
+ margin: 0;
+ padding: 0;
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ }
+
+ body {
+ min-height: 100vh;
+ background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ padding: 40px 20px;
+ }
+
+ .header {
+ text-align: center;
+ margin-bottom: 60px;
+ }
+
+ h1 {
+ font-size: clamp(2.5rem, 8vw, 4rem);
+ color: #fff;
+ margin-bottom: 15px;
+ text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+ }
+
+ .subtitle {
+ font-size: clamp(1rem, 3vw, 1.3rem);
+ color: rgba(255,255,255,0.7);
+ font-weight: 300;
+ }
+
+ .games-container {
+ display: flex;
+ gap: 40px;
+ flex-wrap: wrap;
+ justify-content: center;
+ max-width: 900px;
+ }
+
+ .game-card {
+ background: rgba(255,255,255,0.1);
+ backdrop-filter: blur(10px);
+ border: 1px solid rgba(255,255,255,0.2);
+ border-radius: 24px;
+ padding: 50px 40px;
+ text-align: center;
+ cursor: pointer;
+ transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+ width: 320px;
+ position: relative;
+ overflow: hidden;
+ }
+
+ .game-card::before {
+ content: '';
+ position: absolute;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+ opacity: 0;
+ transition: opacity 0.3s;
+ }
+
+ .game-card:hover {
+ transform: translateY(-15px) scale(1.03);
+ box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+ border-color: rgba(255,255,255,0.4);
+ }
+
+ .game-card:hover::before {
+ opacity: 1;
+ }
+
+ .game-icon {
+ font-size: 80px;
+ margin-bottom: 20px;
+ display: block;
+ filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+ }
+
+ .game-title {
+ font-size: 1.8rem;
+ color: #fff;
+ margin-bottom: 10px;
+ font-weight: 600;
+ }
+
+ .game-desc {
+ font-size: 1rem;
+ color: rgba(255,255,255,0.6);
+ margin-bottom: 25px;
+ }
+
+ .play-btn {
+ display: inline-block;
+ padding: 14px 40px;
+ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ color: #fff;
+ border-radius: 50px;
+ font-weight: 600;
+ font-size: 1.1rem;
+ text-decoration: none;
+ transition: all 0.3s;
+ box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+ }
+
+ .game-card:hover .play-btn {
+ background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+ transform: scale(1.05);
+ box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+ }
+
+ .chess-card:hover .play-btn {
+ background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+ box-shadow: 0 6px 25px rgba(56, 239, 125, 0.5);
+ }
+
+ .backgammon-card:hover .play-btn {
+ background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+ box-shadow: 0 6px 25px rgba(247, 183, 51, 0.5);
+ }
+
+ .footer {
+ margin-top: 60px;
+ color: rgba(255,255,255,0.4);
+ font-size: 0.9rem;
+ }
+
+ @media (max-width: 700px) {
+ .games-container {
+ flex-direction: column;
+ align-items: center;
+ }
+ 
+ .game-card {
+ width: 100%;
+ max-width: 320px;
+ padding: 40px 30px;
+ }
+ }
+
+ /* Animasyonlu arka plan */
+ body::before {
+ content: '';
+ position: fixed;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: 
+ radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+ radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+ radial-gradient(circle at 40% 40%, rgba(56, 239, 125, 0.08) 0%, transparent 40%);
+ pointer-events: none;
+ z-index: -1;
+ }
+ </style>
+</head>
+<body>
+
+<div class="header">
+ <h1>🎮 Oyun Platformu</h1>
+ <p class="subtitle">Eğlenceli oyunlar tek çatı altında</p>
+</div>
+
+<div class="games-container">
+ 
+ <div class="game-card chess-card" onclick="window.location.href='satranc.html'">
+ <span class="game-icon">♟️</span>
+ <h2 class="game-title">Satranç</h2>
+ <p class="game-desc">Strateji oyunu - Bilgisayara karşı oyna</p>
+ <span class="play-btn">🎯 Oyna</span>
+ </div>
+
+ <div class="game-card backgammon-card" onclick="window.location.href='tavla.html'">
+ <span class="game-icon">🎲</span>
+ <h2 class="game-title">Tavla</h2>
+ <p class="game-desc">Zar oyunu - Şans ve strateji</p>
+ <span class="play-btn">🎲 Oyna</span>
+ </div>
+
+</div>
+
+<div class="footer">
+ <p>Tarayıcıda oyna, kaybetme, eğlen! 🎉</p>
+</div>
+
+</body>
+</html>
