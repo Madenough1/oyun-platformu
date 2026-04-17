@@ -3,200 +3,179 @@
 <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>🎮 Oyun Platformu</title>
+ <title>Oyun Platformu</title>
  <style>
+ /* Genel Reset ve Tipografi */
  * {
- box-sizing: border-box;
  margin: 0;
  padding: 0;
- font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ box-sizing: border-box;
+ font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
  }
 
+ /* Modern Gradient Arka Plan */
  body {
  min-height: 100vh;
- background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
  display: flex;
  flex-direction: column;
  align-items: center;
  justify-content: center;
- padding: 40px 20px;
+ background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #6a0dad 100%);
+ background-size: 200% 200%;
+ animation: gradientBG 15s ease infinite;
+ color: #ffffff;
+ overflow-x: hidden;
  }
 
- .header {
+ /* Arka Plan Animasyonu */
+ @keyframes gradientBG {
+ 0% { background-position: 0% 50%; }
+ 50% { background-position: 100% 50%; }
+ 100% { background-position: 0% 50%; }
+ }
+
+ /* Hero Bölümü */
+ .hero {
  text-align: center;
- margin-bottom: 60px;
+ margin-bottom: 4rem;
+ padding: 0 20px;
+ animation: fadeInDown 1s ease-out;
  }
 
- h1 {
- font-size: clamp(2.5rem, 8vw, 4rem);
- color: #fff;
- margin-bottom: 15px;
- text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+ .hero h1 {
+ font-size: 4rem;
+ font-weight: 800;
+ margin-bottom: 1rem;
+ text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+ letter-spacing: 2px;
  }
 
- .subtitle {
- font-size: clamp(1rem, 3vw, 1.3rem);
- color: rgba(255,255,255,0.7);
+ .hero p {
+ font-size: 1.5rem;
+ opacity: 0.9;
  font-weight: 300;
  }
 
- .games-container {
+ /* Kart Konteyneri */
+ .cards-container {
  display: flex;
- gap: 40px;
+ gap: 3rem;
  flex-wrap: wrap;
  justify-content: center;
- max-width: 900px;
+ padding: 20px;
+ width: 100%;
+ max-width: 1000px;
+ animation: fadeInUp 1s ease-out 0.3s both;
  }
 
- .game-card {
- background: rgba(255,255,255,0.1);
- backdrop-filter: blur(10px);
- border: 1px solid rgba(255,255,255,0.2);
+ /* Glassmorphism Kart Tasarımı */
+ .card {
+ background: rgba(255, 255, 255, 0.1);
+ backdrop-filter: blur(12px);
+ -webkit-backdrop-filter: blur(12px);
+ border: 1px solid rgba(255, 255, 255, 0.2);
  border-radius: 24px;
- padding: 50px 40px;
- text-align: center;
- cursor: pointer;
+ padding: 3rem 2rem;
+ width: 280px;
+ height: 320px;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ text-decoration: none;
+ color: white;
  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
- width: 320px;
+ box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
  position: relative;
  overflow: hidden;
  }
 
- .game-card::before {
- content: '';
- position: absolute;
- top: 0;
- left: 0;
- right: 0;
- bottom: 0;
- background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
- opacity: 0;
- transition: opacity 0.3s;
+ /* Kart Hover Efekti */
+ .card:hover {
+ transform: translateY(-15px) scale(1.05);
+ box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+ background: rgba(255, 255, 255, 0.15);
+ border: 1px solid rgba(255, 255, 255, 0.4);
  }
 
- .game-card:hover {
- transform: translateY(-15px) scale(1.03);
- box-shadow: 0 30px 60px rgba(0,0,0,0.4);
- border-color: rgba(255,255,255,0.4);
+ /* Kart İkonları */
+ .icon {
+ font-size: 6rem;
+ margin-bottom: 1.5rem;
+ filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+ transition: transform 0.3s ease;
  }
 
- .game-card:hover::before {
- opacity: 1;
+ .card:hover .icon {
+ transform: scale(1.1) rotate(5deg);
  }
 
- .game-icon {
- font-size: 80px;
- margin-bottom: 20px;
- display: block;
- filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+ /* Kart Metinleri */
+ .card-title {
+ font-size: 2rem;
+ font-weight: 700;
+ margin-bottom: 0.5rem;
+ letter-spacing: 1px;
  }
 
- .game-title {
- font-size: 1.8rem;
- color: #fff;
- margin-bottom: 10px;
- font-weight: 600;
- }
-
- .game-desc {
- font-size: 1rem;
- color: rgba(255,255,255,0.6);
- margin-bottom: 25px;
- }
-
- .play-btn {
- display: inline-block;
- padding: 14px 40px;
- background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
- color: #fff;
- border-radius: 50px;
- font-weight: 600;
+ .card-subtitle {
  font-size: 1.1rem;
- text-decoration: none;
- transition: all 0.3s;
- box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+ opacity: 0.8;
+ font-weight: 400;
+ text-transform: uppercase;
+ letter-spacing: 2px;
  }
 
- .game-card:hover .play-btn {
- background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
- transform: scale(1.05);
- box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+ /* Animasyonlar */
+ @keyframes fadeInDown {
+ from { opacity: 0; transform: translateY(-30px); }
+ to { opacity: 1; transform: translateY(0); }
  }
 
- .chess-card:hover .play-btn {
- background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
- box-shadow: 0 6px 25px rgba(56, 239, 125, 0.5);
+ @keyframes fadeInUp {
+ from { opacity: 0; transform: translateY(30px); }
+ to { opacity: 1; transform: translateY(0); }
  }
 
- .backgammon-card:hover .play-btn {
- background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
- box-shadow: 0 6px 25px rgba(247, 183, 51, 0.5);
+ /* Mobil Uyumluluk */
+ @media (max-width: 768px) {
+ .hero h1 {
+ font-size: 3rem;
  }
-
- .footer {
- margin-top: 60px;
- color: rgba(255,255,255,0.4);
- font-size: 0.9rem;
+ .hero p {
+ font-size: 1.2rem;
  }
-
- @media (max-width: 700px) {
- .games-container {
- flex-direction: column;
- align-items: center;
+ .cards-container {
+ gap: 2rem;
  }
- 
- .game-card {
+ .card {
  width: 100%;
  max-width: 320px;
- padding: 40px 30px;
+ height: 280px;
  }
- }
-
- /* Animasyonlu arka plan */
- body::before {
- content: '';
- position: fixed;
- top: 0;
- left: 0;
- right: 0;
- bottom: 0;
- background: 
- radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
- radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
- radial-gradient(circle at 40% 40%, rgba(56, 239, 125, 0.08) 0%, transparent 40%);
- pointer-events: none;
- z-index: -1;
  }
  </style>
 </head>
 <body>
 
-<div class="header">
- <h1>🎮 Oyun Platformu</h1>
- <p class="subtitle">Eğlenceli oyunlar tek çatı altında</p>
-</div>
-
-<div class="games-container">
- 
- <div class="game-card chess-card" onclick="window.location.href='satranc.html'">
- <span class="game-icon">♟️</span>
- <h2 class="game-title">Satranç</h2>
- <p class="game-desc">Strateji oyunu - Bilgisayara karşı oyna</p>
- <span class="play-btn">🎯 Oyna</span>
+ <div class="hero">
+ <h1>🎮 Oyunlar</h1>
+ <p>Eğlenceli oyunlar tek çatı altında</p>
  </div>
 
- <div class="game-card backgammon-card" onclick="window.location.href='tavla.html'">
- <span class="game-icon">🎲</span>
- <h2 class="game-title">Tavla</h2>
- <p class="game-desc">Zar oyunu - Şans ve strateji</p>
- <span class="play-btn">🎲 Oyna</span>
+ <div class="cards-container">
+ <a href="satranc.html" class="card">
+ <span class="icon">♟️</span>
+ <span class="card-title">Satranç</span>
+ <span class="card-subtitle">Strateji Oyunu</span>
+ </a>
+
+ <a href="tavla.html" class="card">
+ <span class="icon">🎲</span>
+ <span class="card-title">Tavla</span>
+ <span class="card-subtitle">Zar Oyunu</span>
+ </a>
  </div>
-
-</div>
-
-<div class="footer">
- <p>Tarayıcıda oyna, kaybetme, eğlen! 🎉</p>
-</div>
 
 </body>
 </html>
