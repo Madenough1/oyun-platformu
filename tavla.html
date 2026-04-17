@@ -2,64 +2,748 @@
 <html lang="tr">
 <head>
  <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Tavla - Yakında</title>
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+ <title>Profesyonel Tavla</title>
  <style>
- * { box-sizing: border-box; margin: 0; padding: 0; }
+ :root {
+ --bg-color: #1e1e24;
+ --board-bg: #8b5a2b;
+ --board-border: #4a2e15;
+ --point-dark: #3e2723;
+ --point-light: #d7ccc8;
+ --white-checker: #f5f5f5;
+ --red-checker: #d32f2f;
+ --highlight: rgba(255, 235, 59, 0.5);
+ --text-color: #fff;
+ }
+
+ * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
  body {
- min-height: 100vh;
- background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: var(--bg-color);
+ color: var(--text-color);
  display: flex;
  flex-direction: column;
  align-items: center;
- justify-content: center;
- font-family: 'Segoe UI', sans-serif;
- color: #fff;
- text-align: center;
- padding: 20px;
+ min-height: 100vh;
+ padding: 10px;
  }
- .dice { font-size: 100px; animation: bounce 2s infinite; }
- @keyframes bounce {
- 0%, 100% { transform: translateY(0); }
- 50% { transform: translateY(-20px); }
+
+ header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ width: 100%;
+ max-width: 800px;
+ margin-bottom: 10px;
+ background: #2a2a35;
+ padding: 15px;
+ border-radius: 8px;
+ box-shadow: 0 4px 6px rgba(0,0,0,0.3);
  }
- h1 { font-size: 2.5rem; margin: 30px 0 15px; }
- p { color: rgba(255,255,255,0.7); font-size: 1.2rem; margin-bottom: 30px; }
- .back-btn {
- padding: 15px 40px;
- background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
- color: #fff;
+
+ .controls select, .controls button {
+ padding: 8px 12px;
+ margin-left: 5px;
  border: none;
- border-radius: 50px;
- font-size: 1.1rem;
+ border-radius: 4px;
+ background: #4a4a5a;
+ color: white;
  cursor: pointer;
- text-decoration: none;
- transition: transform 0.3s, box-shadow 0.3s;
+ font-weight: bold;
+ transition: background 0.2s;
  }
- .back-btn:hover {
- transform: scale(1.05);
- box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+
+ .controls button:hover { background: #5c5c70; }
+ .controls button:active { transform: scale(0.95); }
+
+ .game-info { text-align: center; font-size: 1.2rem; font-weight: bold; }
+ .dice-container { display: flex; gap: 10px; justify-content: center; margin: 10px 0; height: 40px;}
+ 
+ .die {
+ width: 40px; height: 40px;
+ background: white; color: black;
+ border-radius: 8px;
+ display: flex; justify-content: center; align-items: center;
+ font-size: 1.5rem; font-weight: bold;
+ box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+ transition: transform 0.3s ease;
  }
- .note {
- margin-top: 40px;
- padding: 20px;
- background: rgba(255,255,255,0.1);
- border-radius: 15px;
- max-width: 500px;
+ .die.used { opacity: 0.3; }
+
+ .board-container {
+ position: relative;
+ width: 100%;
+ max-width: 800px;
+ aspect-ratio: 4 / 3;
+ background-color: var(--board-bg);
+ border: 15px solid var(--board-border);
+ border-radius: 10px;
+ display: flex;
+ box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 20px rgba(0,0,0,0.5);
  }
- .note h3 { color: #f7b733; margin-bottom: 10px; }
- .note p { font-size: 0.95rem; margin-bottom: 5px; }
+
+ .half-board {
+ flex: 1;
+ display: flex;
+ flex-direction: column;
+ position: relative;
+ }
+
+ .bar {
+ width: 40px;
+ background-color: var(--board-border);
+ border-left: 2px solid #33200f;
+ border-right: 2px solid #33200f;
+ display: flex;
+ flex-direction: column;
+ justify-content: center;
+ align-items: center;
+ z-index: 10;
+ }
+
+ .row {
+ flex: 1;
+ display: flex;
+ position: relative;
+ }
+
+ .bottom-row { align-items: flex-end; }
+ .top-row { align-items: flex-start; }
+
+ .point-container {
+ flex: 1;
+ height: 100%;
+ position: relative;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ cursor: pointer;
+ }
+
+ .bottom-row .point-container { justify-content: flex-end; }
+ .top-row .point-container { justify-content: flex-start; }
+
+ .point-triangle {
+ position: absolute;
+ width: 100%;
+ height: 80%;
+ z-index: 1;
+ clip-path: polygon(50% 100%, 0 0, 100% 0);
+ }
+
+ .bottom-row .point-triangle { clip-path: polygon(50% 0, 0 100%, 100% 100%); bottom: 0; }
+ .top-row .point-triangle { top: 0; }
+
+ .point-container:nth-child(odd) .point-triangle { background-color: var(--point-dark); }
+ .point-container:nth-child(even) .point-triangle { background-color: var(--point-light); }
+ 
+ .checker {
+ width: 80%;
+ aspect-ratio: 1;
+ border-radius: 50%;
+ z-index: 2;
+ margin: 2% 0;
+ box-shadow: inset -2px -2px 6px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.4);
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ font-size: 0.8rem;
+ font-weight: bold;
+ transition: transform 0.2s;
+ }
+
+ .checker.white { background-color: var(--white-checker); color: #333; border: 2px solid #ccc; }
+ .checker.red { background-color: var(--red-checker); color: white; border: 2px solid #b71c1c; }
+ 
+ .checker.selected { transform: scale(1.1); border-color: #ffeb3b; box-shadow: 0 0 10px #ffeb3b; }
+ .point-container.highlight::after {
+ content: '';
+ position: absolute;
+ top: 0; left: 0; width: 100%; height: 100%;
+ background-color: var(--highlight);
+ z-index: 3;
+ pointer-events: none;
+ }
+
+ .bear-off-zone {
+ width: 50px;
+ background: #2a2a35;
+ border-left: 5px solid var(--board-border);
+ display: flex;
+ flex-direction: column;
+ justify-content: space-between;
+ padding: 5px 0;
+ }
+ 
+ .bear-off-section {
+ flex: 1; display: flex; flex-direction: column; align-items: center;
+ border-bottom: 1px solid #444; position: relative; cursor: pointer;
+ }
+ 
+ .bear-off-section.highlight { background: var(--highlight); }
+
+ #action-btn {
+ display: block; width: 100%; max-width: 300px; margin: 20px auto;
+ padding: 15px; font-size: 1.2rem; background: #4CAF50; color: white;
+ border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
+ }
+ #action-btn:hover { background: #45a049; }
+ #action-btn:disabled { background: #555; cursor: not-allowed; }
+
+ @media (max-width: 600px) {
+ .checker { width: 90%; }
+ header { flex-direction: column; gap: 10px; }
+ .board-container { border-width: 5px; }
+ .bar { width: 25px; }
+ }
  </style>
 </head>
 <body>
- <div class="dice">🎲</div>
- <h1>Tavla Oyunu</h1>
- <p>Yakında burada olacak...</p>
- <a href="index.html" class="back-btn">🏠 Ana Sayfaya Dön</a>
- <div class="note">
- <h3>📝 Not</h3>
- <p>Gemini'den tavla kodunu aldığında</p>
- <p>bu sayfa otomatik güncellenecek!</p>
+
+ <header>
+ <div>Hamle: <span id="move-counter">0</span></div>
+ <div class="game-info" id="status-text">Oyun Bekliyor</div>
+ <div class="controls">
+ <select id="difficulty">
+ <option value="easy">Kolay</option>
+ <option value="medium" selected>Orta</option>
+ <option value="hard">Zor</option>
+ </select>
+ <button id="undo-btn" disabled>Geri Al</button>
+ <button id="restart-btn">Yeniden Başlat</button>
  </div>
+ </header>
+
+ <div class="dice-container" id="dice-container"></div>
+
+ <div class="board-container">
+ <div class="half-board">
+ <div class="row top-row" id="quad-tl"></div> <div class="row bottom-row" id="quad-bl"></div> </div>
+ 
+ <div class="bar" id="bar-zone">
+ </div>
+
+ <div class="half-board">
+ <div class="row top-row" id="quad-tr"></div> <div class="row bottom-row" id="quad-br"></div> </div>
+
+ <div class="bear-off-zone">
+ <div class="bear-off-section" id="bear-off-top"></div> <div class="bear-off-section" id="bear-off-bottom"></div> </div>
+ </div>
+
+ <button id="action-btn">Zar At</button>
+
+<script>
+/**
+ * TAVLA OYUN MOTORU
+ * Beyaz (Oyuncu): 24'ten 1'e doğru hareket eder. Toplama alanı: 0
+ * Kırmızı (Yapay Zeka): 1'den 24'e doğru hareket eder. Toplama alanı: 25
+ */
+
+const STATE = {
+ board: Array(26).fill(null).map(() => ({ player: null, count: 0 })), 
+ // 0: Beyaz Toplama, 25: Kırmızı Toplama
+ bar: { white: 0, red: 0 },
+ turn: 'white', // 'white' veya 'red'
+ dice: [], // [ {val: 3, used: false}, ... ]
+ selectedPoint: null,
+ validMoves: [], // Gidebileceği hedefler
+ moveHistory: [], // Geri alma için
+ totalMoves: 0,
+ gameState: 'playing' // 'playing', 'won_white', 'won_red'
+};
+
+// Başlangıç Dizilimi
+function initBoard() {
+ STATE.board = Array(26).fill(null).map(() => ({ player: null, count: 0 }));
+ STATE.bar = { white: 0, red: 0 };
+ STATE.dice = [];
+ STATE.selectedPoint = null;
+ STATE.validMoves = [];
+ STATE.moveHistory = [];
+ STATE.totalMoves = 0;
+ STATE.gameState = 'playing';
+ STATE.turn = 'white';
+ 
+ // Standart Tavla Dizilimi
+ STATE.board[24] = { player: 'white', count: 2 };
+ STATE.board[13] = { player: 'white', count: 5 };
+ STATE.board[8] = { player: 'white', count: 3 };
+ STATE.board[6] = { player: 'white', count: 5 };
+
+ STATE.board[1] = { player: 'red', count: 2 };
+ STATE.board[12] = { player: 'red', count: 5 };
+ STATE.board[17] = { player: 'red', count: 3 };
+ STATE.board[19] = { player: 'red', count: 5 };
+
+ updateUI();
+}
+
+// Zar Atma
+function rollDice() {
+ if(STATE.dice.some(d => !d.used)) return; // Kullanılmamış zar varsa atılamaz
+ 
+ const d1 = Math.floor(Math.random() * 6) + 1;
+ const d2 = Math.floor(Math.random() * 6) + 1;
+ 
+ STATE.dice = [];
+ if (d1 === d2) {
+ STATE.dice = [
+ {val: d1, used: false}, {val: d1, used: false},
+ {val: d1, used: false}, {val: d1, used: false}
+ ]; // Çift zar = 4 hareket
+ } else {
+ STATE.dice = [{val: d1, used: false}, {val: d2, used: false}];
+ }
+ 
+ STATE.moveHistory = []; // Zar atıldığında geçmiş sıfırlanır
+ STATE.totalMoves++;
+ document.getElementById('undo-btn').disabled = true;
+ checkTurnPossibility();
+ updateUI();
+}
+
+function checkTurnPossibility() {
+ // Hamle yapılamıyorsa sırayı atla
+ if (!hasPossibleMoves(STATE.turn)) {
+ setTimeout(() => {
+ endTurn();
+ }, 1500);
+ }
+}
+
+// Geçerli hamleleri hesaplama
+function calculateValidMoves(player, fromPoint) {
+ let validDests = [];
+ let unusedDice = STATE.dice.filter(d => !d.used).map(d => d.val);
+ // Aynı zarların tekrarını engelle
+ unusedDice = [...new Set(unusedDice)]; 
+
+ let isBarMove = (player === 'white' && fromPoint === 25) || (player === 'red' && fromPoint === 0);
+ 
+ if (STATE.bar[player] > 0 && !isBarMove) return []; // Barda taş varken başka taş oynanamaz
+
+ unusedDice.forEach(die => {
+ let toPoint = player === 'white' ? fromPoint - die : fromPoint + die;
+ 
+ // Bar'dan giriş hesaplaması
+ if (player === 'white' && fromPoint === 25) toPoint = 25 - die; // 24, 23, ...
+ if (player === 'red' && fromPoint === 0) toPoint = die; // 1, 2, ...
+
+ if (isValidDestination(player, fromPoint, toPoint, die)) {
+ validDests.push({ to: toPoint, die: die });
+ }
+ });
+
+ return validDests;
+}
+
+function isValidDestination(player, fromPoint, toPoint, dieVal) {
+ // Toplama işlemi
+ let offBoard = player === 'white' ? toPoint <= 0 : toPoint >= 25;
+ if (offBoard) {
+ if (canBearOff(player)) {
+ // Tam zar veya taş taşıyor mu kuralları (basitleştirilmiş)
+ let exactHit = player === 'white' ? fromPoint === dieVal : (25 - fromPoint) === dieVal;
+ let largerDieOk = true; // Gerçek tavlada daha büyük zarla toplamak için yükseklerde taş olmamalıdır
+ if(!exactHit) {
+ let highestPoint = getHighestPoint(player);
+ if(player === 'white' && fromPoint !== highestPoint) largerDieOk = false;
+ if(player === 'red' && fromPoint !== highestPoint) largerDieOk = false;
+ }
+ return exactHit || largerDieOk;
+ }
+ return false;
+ }
+
+ // Normal tahta içi hareket
+ if (toPoint < 1 || toPoint > 24) return false;
+
+ let target = STATE.board[toPoint];
+ if (target.player === null || target.player === player) return true; // Boş veya kendi taşı
+ if (target.player !== player && target.count === 1) return true; // Kırma (Vurma)
+
+ return false; // Kapı kapalı
+}
+
+function canBearOff(player) {
+ if (STATE.bar[player] > 0) return false;
+ // Tüm taşlar home board'da mı? (Beyaz: 1-6, Kırmızı: 19-24)
+ for (let i = 1; i <= 24; i++) {
+ if (STATE.board[i].player === player) {
+ if (player === 'white' && i > 6) return false;
+ if (player === 'red' && i < 19) return false;
+ }
+ }
+ return true;
+}
+
+function getHighestPoint(player) {
+ let highest = player === 'white' ? 0 : 25;
+ for (let i = 1; i <= 24; i++) {
+ if (STATE.board[i].player === player) {
+ if (player === 'white' && i > highest) highest = i;
+ if (player === 'red' && i < highest) highest = i;
+ }
+ }
+ return highest;
+}
+
+// Taş Hareket Ettirme
+function moveChecker(fromPoint, toPoint, dieVal) {
+ // Durumu geçmişe kaydet
+ STATE.moveHistory.push(JSON.stringify({
+ board: STATE.board, bar: STATE.bar, dice: STATE.dice
+ }));
+ document.getElementById('undo-btn').disabled = false;
+
+ // Zarı kullanılmış işaretle
+ let dieIndex = STATE.dice.findIndex(d => !d.used && d.val === dieVal);
+ if(dieIndex === -1) { // Daha büyük zarla toplama durumu için fallback
+ dieIndex = STATE.dice.findIndex(d => !d.used && d.val > dieVal);
+ }
+ if (dieIndex !== -1) STATE.dice[dieIndex].used = true;
+
+ // Kalkış noktasını eksilt
+ let player = STATE.turn;
+ if (fromPoint === 25 && player === 'white') STATE.bar.white--;
+ else if (fromPoint === 0 && player === 'red') STATE.bar.red--;
+ else {
+ STATE.board[fromPoint].count--;
+ if (STATE.board[fromPoint].count === 0) STATE.board[fromPoint].player = null;
+ }
+
+ // Toplama
+ let offBoard = player === 'white' ? toPoint <= 0 : toPoint >= 25;
+ if (offBoard) {
+ let dest = player === 'white' ? 0 : 25;
+ STATE.board[dest].player = player;
+ STATE.board[dest].count++;
+ } else {
+ // Kırma kontrolü
+ if (STATE.board[toPoint].player !== player && STATE.board[toPoint].count === 1) {
+ let opponent = player === 'white' ? 'red' : 'white';
+ STATE.bar[opponent]++;
+ STATE.board[toPoint].count = 0; // rakip taşı sil
+ }
+ // Taşı yerleştir
+ STATE.board[toPoint].player = player;
+ STATE.board[toPoint].count++;
+ }
+
+ STATE.selectedPoint = null;
+ STATE.validMoves = [];
+ 
+ checkWinCondition();
+ 
+ if (STATE.gameState === 'playing' && STATE.dice.every(d => d.used)) {
+ endTurn();
+ } else {
+ checkTurnPossibility();
+ updateUI();
+ }
+}
+
+function undoMove() {
+ if (STATE.moveHistory.length === 0) return;
+ let lastState = JSON.parse(STATE.moveHistory.pop());
+ STATE.board = lastState.board;
+ STATE.bar = lastState.bar;
+ STATE.dice = lastState.dice;
+ STATE.selectedPoint = null;
+ STATE.validMoves = [];
+ if (STATE.moveHistory.length === 0) document.getElementById('undo-btn').disabled = true;
+ updateUI();
+}
+
+function endTurn() {
+ STATE.turn = STATE.turn === 'white' ? 'red' : 'white';
+ STATE.dice = [];
+ STATE.selectedPoint = null;
+ STATE.validMoves = [];
+ STATE.moveHistory = [];
+ document.getElementById('undo-btn').disabled = true;
+ 
+ updateUI();
+ 
+ if (STATE.turn === 'red' && STATE.gameState === 'playing') {
+ setTimeout(playAI, 800);
+ }
+}
+
+function checkWinCondition() {
+ if (STATE.board[0].count === 15) { STATE.gameState = 'won_white'; alert('Tebrikler! Kazandınız!'); }
+ if (STATE.board[25].count === 15) { STATE.gameState = 'won_red'; alert('Yapay Zeka Kazandı!'); }
+}
+
+function hasPossibleMoves(player) {
+ if (STATE.dice.every(d => d.used)) return false;
+ 
+ let hasMove = false;
+ // Barda taş varsa önce ona bak
+ if (STATE.bar[player] > 0) {
+ let startPoint = player === 'white' ? 25 : 0;
+ let moves = calculateValidMoves(player, startPoint);
+ return moves.length > 0;
+ }
+
+ for (let i = 1; i <= 24; i++) {
+ if (STATE.board[i].player === player) {
+ if (calculateValidMoves(player, i).length > 0) return true;
+ }
+ }
+ return false;
+}
+
+// Tıklama Yönetimi
+function handlePointClick(pointIndex) {
+ if (STATE.turn !== 'white' || STATE.gameState !== 'playing') return;
+ if (STATE.dice.every(d => d.used)) return;
+
+ let isBarWhite = pointIndex === 25;
+ 
+ // Zaten seçilmiş bir hedefe tıklanıyorsa (Hareket)
+ let moveObj = STATE.validMoves.find(m => 
+ (m.to === pointIndex) || 
+ (pointIndex === 0 && m.to <= 0) // Beyaz toplama
+ );
+
+ if (moveObj && STATE.selectedPoint !== null) {
+ moveChecker(STATE.selectedPoint, moveObj.to, moveObj.die);
+ return;
+ }
+
+ // Taş seçimi
+ let hasBar = STATE.bar.white > 0;
+ if (hasBar && !isBarWhite) return; // Barda taş varken board'a tıklanamaz
+
+ if ((isBarWhite && STATE.bar.white > 0) || (STATE.board[pointIndex] && STATE.board[pointIndex].player === 'white')) {
+ STATE.selectedPoint = pointIndex;
+ STATE.validMoves = calculateValidMoves('white', pointIndex);
+ updateUI();
+ } else {
+ STATE.selectedPoint = null;
+ STATE.validMoves = [];
+ updateUI();
+ }
+}
+
+// ----- YAPAY ZEKA (AI) -----
+function playAI() {
+ if (STATE.turn !== 'red' || STATE.gameState !== 'playing') return;
+ 
+ if (STATE.dice.length === 0) {
+ rollDice();
+ setTimeout(playAI, 1000);
+ return;
+ }
+
+ if (STATE.dice.every(d => d.used)) {
+ endTurn();
+ return;
+ }
+
+ let diff = document.getElementById('difficulty').value;
+ let allPossibleMoves = [];
+ 
+ let startPoints = STATE.bar.red > 0 ? [0] : [];
+ if(startPoints.length === 0) {
+ for(let i=1; i<=24; i++) { if(STATE.board[i].player === 'red') startPoints.push(i); }
+ }
+
+ startPoints.forEach(pt => {
+ let moves = calculateValidMoves('red', pt);
+ moves.forEach(m => { allPossibleMoves.push({from: pt, to: m.to, die: m.die}); });
+ });
+
+ if (allPossibleMoves.length === 0) {
+ endTurn();
+ return;
+ }
+
+ // Yapay Zeka Mantığı
+ let chosenMove = allPossibleMoves[0];
+
+ if (diff === 'medium' || diff === 'hard') {
+ // En iyi hamleyi seç (Puanlama: Kırma > Toplama > Kapı Alma)
+ let bestScore = -999;
+ allPossibleMoves.forEach(m => {
+ let score = 0;
+ if (m.to >= 25) score += 50; // Toplama
+ else if (STATE.board[m.to].player === 'white' && STATE.board[m.to].count === 1) score += 40; // Kırma
+ else if (STATE.board[m.to].player === 'red' && STATE.board[m.to].count === 1) score += 20; // Kapı yapma
+ 
+ if(diff === 'hard') {
+ // Gelişmiş: Açık verme riskini hesapla (basitçe)
+ score += Math.random() * 5; // öngörülemezlik
+ }
+
+ if (score > bestScore) {
+ bestScore = score;
+ chosenMove = m;
+ }
+ });
+ } else {
+ // Kolay: Rastgele
+ chosenMove = allPossibleMoves[Math.floor(Math.random() * allPossibleMoves.length)];
+ }
+
+ // UI'da seçimi göster
+ STATE.selectedPoint = chosenMove.from;
+ updateUI();
+
+ setTimeout(() => {
+ moveChecker(chosenMove.from, chosenMove.to, chosenMove.die);
+ if(!STATE.dice.every(d => d.used) && STATE.gameState === 'playing') {
+ setTimeout(playAI, 800);
+ }
+ }, 600);
+}
+
+
+// ----- ARAYÜZ OLUŞTURMA (RENDER) -----
+function buildBoardUI() {
+ const createPoints = (start, end, step, targetId) => {
+ const container = document.getElementById(targetId);
+ container.innerHTML = '';
+ for (let i = start; i !== end + step; i += step) {
+ let div = document.createElement('div');
+ div.className = 'point-container';
+ div.id = `point-${i}`;
+ div.onclick = () => handlePointClick(i);
+ 
+ let triangle = document.createElement('div');
+ triangle.className = 'point-triangle';
+ div.appendChild(triangle);
+ 
+ container.appendChild(div);
+ }
+ };
+
+ // Beyazın yönü 24->1. 
+ // Üst Sol: 13-18, Üst Sağ: 19-24
+ // Alt Sol: 12-7, Alt Sağ: 6-1
+ createPoints(13, 18, 1, 'quad-tl');
+ createPoints(19, 24, 1, 'quad-tr');
+ createPoints(12, 7, -1, 'quad-bl');
+ createPoints(6, 1, -1, 'quad-br');
+}
+
+function updateUI() {
+ document.getElementById('move-counter').innerText = STATE.totalMoves;
+ 
+ let btn = document.getElementById('action-btn');
+ if (STATE.dice.length === 0 || STATE.dice.every(d => d.used)) {
+ btn.innerText = STATE.turn === 'white' ? "Zar At" : "Yapay Zeka Bekleniyor...";
+ btn.disabled = STATE.turn !== 'white';
+ } else {
+ btn.innerText = "Hamle Yapınız";
+ btn.disabled = true;
+ }
+
+ document.getElementById('status-text').innerText = 
+ STATE.gameState !== 'playing' ? "Oyun Bitti!" :
+ (STATE.turn === 'white' ? "Sıra Sizde (Beyaz)" : "Sıra Bilgisayarda (Kırmızı)");
+
+ // Zarları Çiz
+ let diceCont = document.getElementById('dice-container');
+ diceCont.innerHTML = '';
+ STATE.dice.forEach(d => {
+ let el = document.createElement('div');
+ el.className = `die ${d.used ? 'used' : ''}`;
+ el.innerHTML = getDiceIcon(d.val);
+ diceCont.appendChild(el);
+ });
+
+ // Temizle
+ document.querySelectorAll('.point-container').forEach(el => {
+ el.classList.remove('highlight');
+ Array.from(el.children).forEach(c => { if(c.classList.contains('checker')) c.remove(); });
+ });
+
+ // Bar Temizle
+ let barCont = document.getElementById('bar-zone');
+ barCont.innerHTML = '';
+ 
+ // Toplama Alanı Temizle
+ document.getElementById('bear-off-top').innerHTML = '';
+ document.getElementById('bear-off-bottom').innerHTML = '';
+ document.getElementById('bear-off-top').classList.remove('highlight');
+ document.getElementById('bear-off-top').onclick = null;
+ document.getElementById('bear-off-top').onclick = null;
+
+ // Taşları Çiz (Tahta)
+ for (let i = 1; i <= 24; i++) {
+ let pointData = STATE.board[i];
+ if (pointData.count > 0) {
+ let container = document.getElementById(`point-${i}`);
+ let displayCount = Math.min(pointData.count, 5); // Ekrana max 5 sığdır, kalanı sayı yaz
+ 
+ for (let c = 0; c < displayCount; c++) {
+ let checker = document.createElement('div');
+ checker.className = `checker ${pointData.player}`;
+ if (c === displayCount - 1 && pointData.count > 5) checker.innerText = `+${pointData.count - 4}`;
+ if (STATE.selectedPoint === i) checker.classList.add('selected');
+ container.appendChild(checker);
+ }
+ }
+ }
+
+ // Bar Taşlarını Çiz
+ const drawBar = (player, count, pointIndex) => {
+ for(let i=0; i<Math.min(count, 3); i++) {
+ let checker = document.createElement('div');
+ checker.className = `checker ${player}`;
+ if(i===2 && count > 3) checker.innerText = `+${count-2}`;
+ if(STATE.selectedPoint === pointIndex) checker.classList.add('selected');
+ checker.onclick = () => handlePointClick(pointIndex);
+ barCont.appendChild(checker);
+ }
+ };
+ drawBar('white', STATE.bar.white, 25);
+ drawBar('red', STATE.bar.red, 0);
+
+ // Toplanmış Taşlar
+ let bWhite = STATE.board[0].count;
+ let bRed = STATE.board[25].count;
+ if(bWhite > 0) {
+ let c = document.createElement('div'); c.className='checker white'; c.innerText=bWhite;
+ document.getElementById('bear-off-top').appendChild(c);
+ }
+ if(bRed > 0) {
+ let c = document.createElement('div'); c.className='checker red'; c.innerText=bRed;
+ document.getElementById('bear-off-bottom').appendChild(c);
+ }
+
+ // Vurgulamalar (Geçerli Hamleler)
+ STATE.validMoves.forEach(m => {
+ if (m.to <= 0) {
+ document.getElementById('bear-off-top').classList.add('highlight');
+ document.getElementById('bear-off-top').onclick = () => handlePointClick(0);
+ } else if (m.to >= 25) {
+ // Red toplama
+ } else {
+ let el = document.getElementById(`point-${m.to}`);
+ if(el) el.classList.add('highlight');
+ }
+ });
+}
+
+function getDiceIcon(val) {
+ const dots = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+ return dots[val - 1] || val;
+}
+
+// Event Listeners
+document.getElementById('action-btn').addEventListener('click', rollDice);
+document.getElementById('restart-btn').addEventListener('click', initBoard);
+document.getElementById('undo-btn').addEventListener('click', undoMove);
+
+// Başlat
+buildBoardUI();
+initBoard();
+
+</script>
 </body>
 </html>
