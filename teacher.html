@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Benim İngilizce Arkadaşım</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; background-color: #FFF9F0; overscroll-behavior-y: none; }
+        .tap-highlight-transparent { -webkit-tap-highlight-color: transparent; }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 350px;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .animate-pop { animation: pop 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Chosen Palette: Warm Neutrals with Pastel Accents (Cream, Soft Peach, Mint Green, Light Sky Blue) -->
+    <!-- Application Structure Plan: The SPA uses a 3-tab dashboard structure (Öğren/Learn, Konuş/Speak, Başarılarım/Progress) designed for an iPad screen. This structure separates tasks logically: passive vocabulary intake, active pronunciation practice, and gamified progress tracking. Large touch targets and emoji-based visuals are used to cater to an 8-year-old user's cognitive and motor skills. -->
+    <!-- Visualization & Content Choices: 
+         1. Vocabulary -> Interactive Flashcards (HTML/JS) -> Goal: Inform -> Simple, large text with Emojis (No SVG) and Text-to-Speech interaction.
+         2. Speaking Practice -> Voice Recognition Interface (HTML/JS) -> Goal: Interactive Practice -> Real-time feedback using Web Speech API.
+         3. Progress Tracking -> Bar Chart (Chart.js) -> Goal: Organize/Motivate -> Shows words learned per category to encourage daily usage. 
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <header class="bg-white shadow-sm p-4 sticky top-0 z-10 flex justify-center items-center rounded-b-3xl">
+        <h1 class="text-3xl font-extrabold text-orange-400 tracking-wide">🌟 İngilizce Arkadaşım</h1>
+    </header>
+
+    <nav class="flex justify-center gap-4 p-4 mt-2">
+        <button onclick="switchTab('learn')" id="btn-learn" class="tap-highlight-transparent flex-1 max-w-[150px] bg-blue-100 text-blue-700 py-3 px-4 rounded-2xl font-bold text-xl shadow-sm border-b-4 border-blue-200 transition-transform transform hover:scale-105 active:scale-95">📖 Öğren</button>
+        <button onclick="switchTab('speak')" id="btn-speak" class="tap-highlight-transparent flex-1 max-w-[150px] bg-green-100 text-green-700 py-3 px-4 rounded-2xl font-bold text-xl shadow-sm border-b-4 border-green-200 transition-transform transform hover:scale-105 active:scale-95">🎤 Konuş</button>
+        <button onclick="switchTab('progress')" id="btn-progress" class="tap-highlight-transparent flex-1 max-w-[150px] bg-purple-100 text-purple-700 py-3 px-4 rounded-2xl font-bold text-xl shadow-sm border-b-4 border-purple-200 transition-transform transform hover:scale-105 active:scale-95">🏆 Karne</button>
+    </nav>
+
+    <main class="flex-grow p-4 overflow-y-auto pb-10">
+
+        <section id="tab-learn" class="max-w-2xl mx-auto block">
+            <div class="bg-white rounded-3xl p-6 shadow-lg border-2 border-orange-100 text-center">
+                <p class="text-lg text-gray-500 mb-4">Burada yeni İngilizce kelimeler öğreneceğiz! Resme bak, kelimeyi gör ve dinlemek için hoparlöre dokun.</p>
+                
+                <div class="flex justify-between items-center mt-6">
+                    <button onclick="prevWord()" class="tap-highlight-transparent text-4xl bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center shadow hover:bg-orange-200 active:scale-90">⬅️</button>
+                    
+                    <div id="flashcard" class="flex flex-col items-center justify-center p-4 transition-all">
+                        <div id="word-emoji" class="text-8xl mb-4 select-none">🍎</div>
+                        <h2 id="word-en" class="text-5xl font-extrabold text-gray-800 mb-2">Apple</h2>
+                        <h3 id="word-tr" class="text-2xl font-semibold text-gray-400">Elma</h3>
+                        
+                        <button onclick="speakWord()" class="mt-8 tap-highlight-transparent bg-blue-400 text-white text-3xl w-20 h-20 rounded-full flex items-center justify-center shadow-lg border-b-4 border-blue-500 active:border-b-0 active:translate-y-1 transition-all">
+                            🔊
+                        </button>
+                    </div>
+
+                    <button onclick="nextWord()" class="tap-highlight-transparent text-4xl bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center shadow hover:bg-orange-200 active:scale-90">➡️</button>
+                </div>
+            </div>
+            <div class="text-center mt-4 text-gray-400 font-bold" id="word-counter">1 / 5</div>
+        </section>
+
+        <section id="tab-speak" class="max-w-2xl mx-auto hidden">
+            <div class="bg-white rounded-3xl p-6 shadow-lg border-2 border-green-100 text-center">
+                <p class="text-lg text-gray-500 mb-4">Şimdi sıra sende! Mikrofon tuşuna bas ve ekrandaki kelimeyi yüksek sesle söyle.</p>
+                
+                <div class="mt-8 mb-10">
+                    <div id="speak-emoji" class="text-7xl mb-4">🐱</div>
+                    <h2 id="speak-target" class="text-4xl font-extrabold text-green-600 mb-2">Cat</h2>
+                    <p class="text-gray-400 text-xl">"Kedi" demeyi dene</p>
+                </div>
+
+                <div class="flex flex-col items-center justify-center gap-6">
+                    <button id="mic-btn" onclick="startListening()" class="tap-highlight-transparent bg-red-400 text-white text-5xl w-28 h-28 rounded-full flex items-center justify-center shadow-lg border-b-8 border-red-500 active:border-b-0 active:translate-y-2 transition-all">
+                        🎤
+                    </button>
+                    <p id="listen-status" class="text-xl font-bold text-gray-500 h-8">Mikrofona dokun ve konuş...</p>
+                </div>
+
+                <div id="feedback-area" class="mt-6 p-4 rounded-2xl hidden text-2xl font-bold">
+                </div>
+                
+                <button onclick="nextSpeakWord()" class="mt-8 tap-highlight-transparent bg-gray-100 text-gray-600 py-3 px-8 rounded-xl font-bold text-lg active:scale-95">Başka Kelime Dene ⏭️</button>
+            </div>
+        </section>
+
+        <section id="tab-progress" class="max-w-2xl mx-auto hidden">
+            <div class="bg-white rounded-3xl p-6 shadow-lg border-2 border-purple-100 text-center">
+                <p class="text-lg text-gray-500 mb-4">Harika gidiyorsun! İşte şu ana kadar öğrendiğin kelime kategorilerindeki başarın.</p>
+                
+                <div class="chart-container mt-6">
+                    <canvas id="progressChart"></canvas>
+                </div>
+
+                <div class="mt-8 grid grid-cols-2 gap-4">
+                    <div class="bg-yellow-100 p-4 rounded-2xl border border-yellow-200">
+                        <div class="text-4xl mb-2">🏆</div>
+                        <div class="text-gray-600 font-bold">Toplam Puan</div>
+                        <div class="text-3xl font-extrabold text-yellow-600" id="total-score">150</div>
+                    </div>
+                    <div class="bg-pink-100 p-4 rounded-2xl border border-pink-200">
+                        <div class="text-4xl mb-2">⭐</div>
+                        <div class="text-gray-600 font-bold">Doğru Telaffuz</div>
+                        <div class="text-3xl font-extrabold text-pink-600" id="correct-words">5</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const words = [
+            { en: "Apple", tr: "Elma", emoji: "🍎", category: "Yemek" },
+            { en: "Cat", tr: "Kedi", emoji: "🐱", category: "Hayvan" },
+            { en: "Sun", tr: "Güneş", emoji: "☀️", category: "Doğa" },
+            { en: "Car", tr: "Araba", emoji: "🚗", category: "Eşya" },
+            { en: "Tree", tr: "Ağaç", emoji: "🌳", category: "Doğa" },
+            { en: "Dog", tr: "Köpek", emoji: "🐶", category: "Hayvan" },
+            { en: "Banana", tr: "Muz", emoji: "🍌", category: "Yemek" }
+        ];
+
+        let currentWordIndex = 0;
+        let currentSpeakIndex = 0;
+        let score = 150;
+        let correctPronunciations = 5;
+        let myChart = null;
+
+        function switchTab(tabId) {
+            document.getElementById('tab-learn').classList.add('hidden');
+            document.getElementById('tab-speak').classList.add('hidden');
+            document.getElementById('tab-progress').classList.add('hidden');
+            
+            document.getElementById('btn-learn').classList.replace('border-blue-400', 'border-blue-200');
+            document.getElementById('btn-speak').classList.replace('border-green-400', 'border-green-200');
+            document.getElementById('btn-progress').classList.replace('border-purple-400', 'border-purple-200');
+
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            
+            if(tabId === 'learn') document.getElementById('btn-learn').classList.replace('border-blue-200', 'border-blue-400');
+            if(tabId === 'speak') document.getElementById('btn-speak').classList.replace('border-green-200', 'border-green-400');
+            if(tabId === 'progress') {
+                document.getElementById('btn-progress').classList.replace('border-purple-200', 'border-purple-400');
+                initChart();
+            }
+        }
+
+        function updateFlashcard() {
+            const word = words[currentWordIndex];
+            const flashcard = document.getElementById('flashcard');
+            
+            flashcard.classList.remove('animate-pop');
+            void flashcard.offsetWidth; 
+            
+            document.getElementById('word-emoji').innerText = word.emoji;
+            document.getElementById('word-en').innerText = word.en;
+            document.getElementById('word-tr').innerText = word.tr;
+            document.getElementById('word-counter').innerText = `${currentWordIndex + 1} / ${words.length}`;
+            
+            flashcard.classList.add('animate-pop');
+        }
+
+        function nextWord() {
+            currentWordIndex = (currentWordIndex + 1) % words.length;
+            updateFlashcard();
+        }
+
+        function prevWord() {
+            currentWordIndex = (currentWordIndex - 1 + words.length) % words.length;
+            updateFlashcard();
+        }
+
+        function speakWord() {
+            const text = words[currentWordIndex].en;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.8; 
+            utterance.pitch = 1.2; 
+            window.speechSynthesis.speak(utterance);
+            
+            score += 5;
+            updateScoreDisplay();
+        }
+
+        function updateSpeakSection() {
+            const word = words[currentSpeakIndex];
+            document.getElementById('speak-emoji').innerText = word.emoji;
+            document.getElementById('speak-target').innerText = word.en;
+            document.getElementById('feedback-area').classList.add('hidden');
+            document.getElementById('listen-status').innerText = "Mikrofona dokun ve konuş...";
+            document.getElementById('listen-status').classList.replace('text-blue-500', 'text-gray-500');
+        }
+
+        function nextSpeakWord() {
+            currentSpeakIndex = (currentSpeakIndex + 1) % words.length;
+            updateSpeakSection();
+        }
+
+        function startListening() {
+            const statusEl = document.getElementById('listen-status');
+            const feedbackEl = document.getElementById('feedback-area');
+            const targetWord = words[currentSpeakIndex].en.toLowerCase();
+
+            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!window.SpeechRecognition) {
+                statusEl.innerText = "Tarayıcın mikrofonu desteklemiyor 😢";
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.start();
+
+            recognition.onstart = function() {
+                statusEl.innerText = "Seni dinliyorum... 👂";
+                statusEl.classList.replace('text-gray-500', 'text-blue-500');
+            };
+
+            recognition.onspeechend = function() {
+                recognition.stop();
+                statusEl.innerText = "Bekle, kontrol ediyorum... ⏳";
+            };
+
+            recognition.onresult = function(event) {
+                const speechResult = event.results[0][0].transcript.toLowerCase().trim();
+                
+                feedbackEl.classList.remove('hidden');
+                
+                if (speechResult.includes(targetWord)) {
+                    feedbackEl.className = "mt-6 p-4 rounded-2xl text-2xl font-bold bg-green-100 text-green-700 animate-pop";
+                    feedbackEl.innerText = "🎉 Harika! Doğru söyledin!";
+                    correctPronunciations++;
+                    score += 20;
+                    updateScoreDisplay();
+                } else {
+                    feedbackEl.className = "mt-6 p-4 rounded-2xl text-2xl font-bold bg-orange-100 text-orange-700";
+                    feedbackEl.innerHTML = `Hmm, sanırım <b>"${speechResult}"</b> dedin. <br> Bir daha deneyelim! 💪`;
+                }
+                statusEl.innerText = "Tekrar denemek için mikrofona dokun.";
+                statusEl.classList.replace('text-blue-500', 'text-gray-500');
+            };
+
+            recognition.onerror = function(event) {
+                statusEl.innerText = "Sesini duyamadım, tekrar bas! 🎤";
+                statusEl.classList.replace('text-blue-500', 'text-gray-500');
+            };
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('total-score').innerText = score;
+            document.getElementById('correct-words').innerText = correctPronunciations;
+        }
+
+        function initChart() {
+            if (myChart) {
+                myChart.destroy();
+            }
+            
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Hayvanlar 🐶', 'Yemekler 🍎', 'Doğa 🌳', 'Eşyalar 🚗'],
+                    datasets: [{
+                        label: 'Öğrenilen Kelimeler',
+                        data: [4, 6, 3, 2],
+                        backgroundColor: [
+                            'rgba(255, 183, 178, 0.8)', 
+                            'rgba(226, 240, 203, 0.8)', 
+                            'rgba(181, 234, 215, 0.8)', 
+                            'rgba(199, 206, 234, 0.8)'  
+                        ],
+                        borderColor: [
+                            'rgb(255, 183, 178)',
+                            'rgb(226, 240, 203)',
+                            'rgb(181, 234, 215)',
+                            'rgb(199, 206, 234)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw + ' Kelime';
+                                }
+                            },
+                            titleFont: { size: 16, family: 'Nunito' },
+                            bodyFont: { size: 14, family: 'Nunito' },
+                            padding: 12,
+                            backgroundColor: 'rgba(0,0,0,0.7)'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: { family: 'Nunito', size: 14 }
+                            },
+                            grid: { color: '#f0f0f0' }
+                        },
+                        x: {
+                            ticks: {
+                                font: { family: 'Nunito', size: 14, weight: 'bold' }
+                            },
+                            grid: { display: false }
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutBounce'
+                    }
+                }
+            });
+        }
+
+        document.getElementById('btn-learn').classList.replace('border-blue-200', 'border-blue-400');
+        updateFlashcard();
+        updateSpeakSection();
+        updateScoreDisplay();
+    </script>
+</body>
+</html>
