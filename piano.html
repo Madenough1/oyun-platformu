@@ -3,1145 +3,687 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kawai CX101 — Piano Öğretmeni</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+<title>Kawai CX101 — Piano Maestro</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;0,700;1,300;1,500&family=Cinzel:wght@400;600&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #0d0b08;
-    --surface: #181410;
-    --surface2: #221e18;
-    --gold: #c8a96e;
-    --gold-light: #e8c98e;
-    --gold-dim: #7a6340;
-    --ivory: #f5f0e8;
-    --ivory-dim: #c8c0b0;
-    --ebony: #1a1612;
-    --red: #c0392b;
-    --green: #27ae60;
-    --accent: #8b6914;
-    --text: #e8dcc8;
-    --text-dim: #8a7d6a;
-  }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Crimson Pro', serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    background-image:
-      radial-gradient(ellipse 80% 60% at 50% -20%, rgba(200,169,110,0.08) 0%, transparent 70%),
-      repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(200,169,110,0.015) 80px, rgba(200,169,110,0.015) 81px);
-  }
-
-  /* HEADER */
-  header {
-    text-align: center;
-    padding: 2.5rem 1rem 1.5rem;
-    position: relative;
-  }
-  header::after {
-    content: '';
-    display: block;
-    width: 180px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    margin: 1.2rem auto 0;
-  }
-  .brand {
-    font-size: 0.7rem;
-    letter-spacing: 0.35em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: 0.5rem;
-  }
-  h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
-    font-weight: 400;
-    color: var(--gold-light);
-    letter-spacing: 0.02em;
-  }
-  h1 em {
-    font-style: italic;
-    color: var(--ivory-dim);
-  }
-
-  /* LAYOUT */
-  .app {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 1rem 3rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.8rem;
-  }
-
-  /* LESSON SELECTOR */
-  .lesson-panel {
-    background: var(--surface);
-    border: 1px solid rgba(200,169,110,0.15);
-    border-radius: 2px;
-    padding: 1.5rem 2rem;
-  }
-  .panel-title {
-    font-size: 0.65rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: 1rem;
-  }
-  .lesson-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 0.6rem;
-  }
-  .lesson-btn {
-    background: var(--surface2);
-    border: 1px solid rgba(200,169,110,0.12);
-    color: var(--ivory-dim);
-    font-family: 'Crimson Pro', serif;
-    font-size: 0.9rem;
-    padding: 0.6rem 0.8rem;
-    cursor: pointer;
-    border-radius: 1px;
-    transition: all 0.2s;
-    text-align: left;
-  }
-  .lesson-btn:hover { border-color: var(--gold-dim); color: var(--gold-light); }
-  .lesson-btn.active { background: rgba(200,169,110,0.12); border-color: var(--gold); color: var(--gold-light); }
-
-  /* SCORE & STATUS */
-  .status-bar {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    background: var(--surface);
-    border: 1px solid rgba(200,169,110,0.15);
-    border-radius: 2px;
-    padding: 1rem 1.8rem;
-    flex-wrap: wrap;
-  }
-  .stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.2rem;
-    min-width: 60px;
-  }
-  .stat-val {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
-    color: var(--gold-light);
-    line-height: 1;
-  }
-  .stat-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-  }
-  .divider-v {
-    width: 1px;
-    height: 40px;
-    background: rgba(200,169,110,0.15);
-  }
-
-  /* FEEDBACK */
-  .feedback-area {
-    flex: 1;
-    text-align: center;
-    min-width: 200px;
-  }
-  .feedback-msg {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.15rem;
-    font-style: italic;
-    transition: all 0.3s;
-    min-height: 1.6rem;
-  }
-  .feedback-msg.correct { color: var(--green); }
-  .feedback-msg.wrong { color: var(--red); }
-  .feedback-msg.info { color: var(--ivory-dim); }
-
-  /* NOTE TARGET */
-  .target-section {
-    background: var(--surface);
-    border: 1px solid rgba(200,169,110,0.15);
-    border-radius: 2px;
-    padding: 2rem;
-    text-align: center;
-  }
-  .target-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: 1rem;
-  }
-  .target-note {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(3rem, 8vw, 5rem);
-    color: var(--gold-light);
-    line-height: 1;
-    margin-bottom: 0.5rem;
-    transition: all 0.3s;
-  }
-  .target-octave {
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    letter-spacing: 0.2em;
-  }
-  .target-hint {
-    margin-top: 1rem;
-    font-size: 0.95rem;
-    color: var(--text-dim);
-    font-style: italic;
-  }
-  .listen-btn {
-    margin-top: 1.2rem;
-    background: transparent;
-    border: 1px solid var(--gold-dim);
-    color: var(--gold);
-    font-family: 'Crimson Pro', serif;
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
-    padding: 0.5rem 1.4rem;
-    cursor: pointer;
-    border-radius: 1px;
-    transition: all 0.2s;
-  }
-  .listen-btn:hover { background: rgba(200,169,110,0.1); border-color: var(--gold); }
-
-  /* STAFF / SHEET MUSIC display */
-  .staff-wrap {
-    display: flex;
-    justify-content: center;
-    margin: 1rem 0 0;
-  }
-  canvas#staffCanvas {
-    display: block;
-  }
-
-  /* PIANO */
-  .piano-wrap {
-    overflow-x: auto;
-    padding: 1rem 0 1.5rem;
-  }
-  .piano-container {
-    position: relative;
-    display: inline-flex;
-    background: linear-gradient(180deg, #2a2218 0%, #0d0b08 100%);
-    border: 1px solid rgba(200,169,110,0.2);
-    border-radius: 4px 4px 8px 8px;
-    padding: 12px 16px 0;
-    gap: 0;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(200,169,110,0.04);
-  }
-  .octave-group {
-    display: flex;
-    position: relative;
-  }
-
-  /* WHITE KEYS */
-  .white-key {
-    width: 42px;
-    height: 170px;
-    background: linear-gradient(180deg, #f5f0e8 0%, #ede8de 60%, #ddd8cc 100%);
-    border: 1px solid #999;
-    border-top: none;
-    border-radius: 0 0 5px 5px;
-    cursor: pointer;
-    position: relative;
-    z-index: 1;
-    transition: background 0.05s, transform 0.05s;
-    box-shadow: inset 0 -2px 4px rgba(0,0,0,0.1), 2px 0 0 rgba(0,0,0,0.05);
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 10px;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  .white-key:hover { background: linear-gradient(180deg, #fff 0%, #f5f0e8 100%); }
-  .white-key:active, .white-key.pressed {
-    background: linear-gradient(180deg, #e8e3d8 0%, #ddd8cc 100%);
-    transform: scaleY(0.995) translateY(1px);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
-  }
-  .white-key.highlight {
-    background: linear-gradient(180deg, #fff9e0 0%, #f5e8a0 100%);
-    border-color: var(--gold);
-    box-shadow: 0 0 15px rgba(200,169,110,0.5), inset 0 -2px 4px rgba(0,0,0,0.1);
-  }
-  .white-key.correct-flash {
-    background: linear-gradient(180deg, #d4f5d4 0%, #a0e0a0 100%) !important;
-    box-shadow: 0 0 20px rgba(39,174,96,0.6) !important;
-  }
-  .white-key.wrong-flash {
-    background: linear-gradient(180deg, #f5d4d4 0%, #e0a0a0 100%) !important;
-    box-shadow: 0 0 20px rgba(192,57,43,0.6) !important;
-  }
-  .key-label {
-    font-size: 10px;
-    color: #888;
-    font-family: 'Crimson Pro', serif;
-    pointer-events: none;
-  }
-
-  /* BLACK KEYS */
-  .black-key {
-    width: 26px;
-    height: 105px;
-    background: linear-gradient(180deg, #2a2218 0%, #1a1410 60%, #0d0b08 100%);
-    border: 1px solid #000;
-    border-top: none;
-    border-radius: 0 0 4px 4px;
-    cursor: pointer;
-    position: absolute;
-    z-index: 2;
-    top: 12px;
-    transition: background 0.05s;
-    box-shadow: 2px 4px 8px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  .black-key:hover { background: linear-gradient(180deg, #3a3228 0%, #2a2218 100%); }
-  .black-key:active, .black-key.pressed {
-    background: linear-gradient(180deg, #1a1410 0%, #0d0b08 100%);
-    transform: translateY(2px);
-    box-shadow: 1px 2px 4px rgba(0,0,0,0.8);
-  }
-  .black-key.highlight {
-    background: linear-gradient(180deg, #5a4a20 0%, #3a3010 100%);
-    box-shadow: 0 0 15px rgba(200,169,110,0.5), 2px 4px 8px rgba(0,0,0,0.8);
-  }
-  .black-key.correct-flash {
-    background: linear-gradient(180deg, #1a5a1a 0%, #0a3a0a 100%) !important;
-    box-shadow: 0 0 20px rgba(39,174,96,0.7) !important;
-  }
-  .black-key.wrong-flash {
-    background: linear-gradient(180deg, #5a1a1a 0%, #3a0a0a 100%) !important;
-    box-shadow: 0 0 20px rgba(192,57,43,0.7) !important;
-  }
-
-  /* PROGRESS BAR */
-  .progress-wrap {
-    height: 3px;
-    background: var(--surface2);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-top: 0.8rem;
-  }
-  .progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
-    border-radius: 2px;
-    transition: width 0.4s ease;
-  }
-
-  /* MODE TOGGLE */
-  .mode-wrap {
-    display: flex;
-    gap: 0.5rem;
-    margin-left: auto;
-  }
-  .mode-btn {
-    background: var(--surface2);
-    border: 1px solid rgba(200,169,110,0.12);
-    color: var(--text-dim);
-    font-family: 'Crimson Pro', serif;
-    font-size: 0.8rem;
-    letter-spacing: 0.1em;
-    padding: 0.4rem 1rem;
-    cursor: pointer;
-    border-radius: 1px;
-    transition: all 0.2s;
-  }
-  .mode-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(200,169,110,0.08); }
-
-  /* CHORD display */
-  .chord-notes {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 0.5rem;
-  }
-  .chord-note-pill {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.2rem;
-    color: var(--gold-light);
-    background: rgba(200,169,110,0.1);
-    border: 1px solid rgba(200,169,110,0.3);
-    padding: 0.2rem 0.8rem;
-    border-radius: 2px;
-  }
-
-  /* KEYBOARD SHORTCUTS hint */
-  .kbd-hint {
-    text-align: center;
-    font-size: 0.75rem;
-    color: var(--text-dim);
-    letter-spacing: 0.05em;
-    padding: 0.5rem;
-  }
-
-  /* NEXT BUTTON */
-  .next-btn {
-    display: none;
-    margin: 1rem auto 0;
-    background: transparent;
-    border: 1px solid var(--gold);
-    color: var(--gold-light);
-    font-family: 'Crimson Pro', serif;
-    font-size: 1rem;
-    letter-spacing: 0.15em;
-    padding: 0.6rem 2rem;
-    cursor: pointer;
-    border-radius: 1px;
-    transition: all 0.2s;
-  }
-  .next-btn:hover { background: rgba(200,169,110,0.12); }
-  .next-btn.visible { display: block; }
-
-  /* FLOATING NOTE ANIMATION */
-  .float-note {
-    position: fixed;
-    pointer-events: none;
-    font-size: 2rem;
-    font-family: 'Playfair Display', serif;
-    color: var(--gold);
-    opacity: 1;
-    animation: floatUp 1.2s ease-out forwards;
-    z-index: 999;
-  }
-  @keyframes floatUp {
-    0% { opacity: 1; transform: translateY(0) scale(1); }
-    100% { opacity: 0; transform: translateY(-80px) scale(0.6); }
-  }
-
-  @media (max-width: 600px) {
-    .white-key { width: 34px; height: 140px; }
-    .black-key { width: 22px; height: 88px; }
-    .lesson-grid { grid-template-columns: repeat(2, 1fr); }
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090c;--bg2:#0e1018;--panel:#12141c;--panel2:#191c28;
+  --border:rgba(180,150,80,.18);--gold:#c8a050;--gold2:#e8c870;--gold3:#8a6828;
+  --ivory:#f0ead8;--ivory2:#c8c0a8;--ivory3:#786858;
+  --green:#2ecc71;--red:#e74c3c;--blue:#3498db;
+  --text:#d8d0b8;--dim:#686048;
+}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Cormorant Garamond',serif;
+  min-height:100vh;overflow-x:hidden;
+  background-image:
+    radial-gradient(ellipse 100% 50% at 50% 0%,rgba(200,160,80,.07) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%,rgba(30,40,80,.3) 0%,transparent 60%);
+}
+.hdr{text-align:center;padding:2.2rem 1rem 1rem;position:relative;}
+.hdr-brand{font-family:'IM Fell English SC',serif;font-size:.62rem;letter-spacing:.4em;color:var(--gold3);margin-bottom:.5rem;}
+.hdr h1{font-family:'Cinzel',serif;font-size:clamp(1.5rem,4vw,2.5rem);font-weight:400;color:var(--gold2);letter-spacing:.06em;}
+.hdr h1 span{color:var(--ivory2);font-weight:300;}
+.hdr-line{width:220px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:.9rem auto 0;}
+.app{max-width:1180px;margin:0 auto;padding:.5rem 1rem 4rem;display:grid;grid-template-columns:270px 1fr;gap:1rem;}
+@media(max-width:840px){.app{grid-template-columns:1fr}}
+.sidebar{display:flex;flex-direction:column;gap:.9rem;}
+/* MIC */
+.mic-card{background:var(--panel);border:1px solid var(--border);border-radius:3px;padding:1.1rem;}
+.sec-title{font-family:'IM Fell English SC',serif;font-size:.58rem;letter-spacing:.3em;color:var(--gold3);margin-bottom:.8rem;}
+.mic-btn{
+  width:100%;padding:.65rem;background:transparent;border:1px solid var(--gold3);
+  color:var(--gold2);font-family:'Cormorant Garamond',serif;font-size:1rem;
+  letter-spacing:.1em;cursor:pointer;border-radius:2px;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+}
+.mic-btn:hover{background:rgba(200,160,80,.1);border-color:var(--gold);}
+.mic-btn.active{background:rgba(46,204,113,.08);border-color:var(--green);color:var(--green);}
+.mic-btn.active .mdot{background:var(--green);animation:pulse 1s infinite;}
+.mdot{width:9px;height:9px;border-radius:50%;background:var(--gold3);display:inline-block;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.35)}}
+.det-wrap{margin-top:.9rem;text-align:center;}
+.det-note{font-family:'Cinzel',serif;font-size:2rem;color:var(--ivory2);min-height:2.5rem;transition:all .12s;}
+.det-note.match{color:var(--green);text-shadow:0 0 18px rgba(46,204,113,.5);}
+.det-note.nomatch{color:var(--red);}
+.det-freq{font-size:.78rem;color:var(--dim);letter-spacing:.1em;margin-top:.15rem;}
+.conf-wrap{height:3px;background:var(--panel2);border-radius:2px;margin-top:.5rem;overflow:hidden;}
+.conf-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--gold3),var(--gold));border-radius:2px;transition:width .08s;}
+/* SCORE */
+.score-card{background:var(--panel);border:1px solid var(--border);border-radius:3px;padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
+.sc-item{text-align:center;}
+.sc-val{font-family:'Cinzel',serif;font-size:1.7rem;color:var(--gold2);line-height:1;}
+.sc-lbl{font-size:.56rem;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin-top:.15rem;}
+/* TABS */
+.tabs{display:flex;gap:.3rem;}
+.tab-btn{flex:1;background:var(--panel);border:1px solid var(--border);color:var(--ivory3);font-family:'Cormorant Garamond',serif;font-size:.85rem;letter-spacing:.06em;padding:.45rem .3rem;cursor:pointer;border-radius:2px;transition:all .2s;}
+.tab-btn.active{background:rgba(200,160,80,.12);border-color:var(--gold);color:var(--gold2);}
+/* LIST */
+.lst{background:var(--panel);border:1px solid var(--border);border-radius:3px;max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--gold3) var(--panel);}
+.li{padding:.7rem .9rem;cursor:pointer;border-bottom:1px solid rgba(180,150,80,.08);transition:all .12s;display:flex;align-items:center;gap:.5rem;}
+.li:last-child{border-bottom:none;}
+.li:hover{background:rgba(200,160,80,.05);}
+.li.active{background:rgba(200,160,80,.11);border-left:2px solid var(--gold);}
+.li-num{font-family:'Cinzel',serif;font-size:.68rem;color:var(--dim);min-width:20px;}
+.li-info{flex:1;}
+.li-name{font-size:.9rem;color:var(--ivory2);line-height:1.2;}
+.li-sub{font-size:.7rem;color:var(--dim);font-style:italic;margin-top:.08rem;}
+.li-star{font-size:.75rem;}
+/* MAIN */
+.main{display:flex;flex-direction:column;gap:.9rem;}
+.fb-banner{background:var(--panel);border:1px solid var(--border);border-radius:3px;padding:.85rem 1.3rem;display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;}
+.fb-icon{font-size:1.6rem;min-width:28px;text-align:center;}
+.fb-txt{font-family:'Cinzel',serif;font-size:1rem;flex:1;color:var(--ivory2);transition:color .18s;}
+.fb-txt.ok{color:var(--green);}
+.fb-txt.bad{color:var(--red);}
+.fb-txt.info{color:var(--ivory2);}
+/* SHEET */
+.sheet-card{background:var(--panel);border:1px solid var(--border);border-radius:3px;padding:1.1rem 1.3rem;}
+.sh-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.9rem;gap:.8rem;flex-wrap:wrap;}
+.sh-title{font-family:'Cinzel',serif;font-size:.95rem;color:var(--gold2);}
+.sh-comp{font-size:.75rem;font-style:italic;color:var(--dim);}
+.sh-acts{display:flex;gap:.4rem;flex-wrap:wrap;}
+.abtn{background:transparent;border:1px solid var(--gold3);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:.82rem;letter-spacing:.08em;padding:.32rem .9rem;cursor:pointer;border-radius:2px;transition:all .2s;white-space:nowrap;}
+.abtn:hover{background:rgba(200,160,80,.1);border-color:var(--gold);}
+.abtn.primary{background:rgba(200,160,80,.14);border-color:var(--gold);color:var(--gold2);}
+.score-scroll{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--gold3) var(--panel2);}
+canvas#sc{display:block;}
+.notes-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:.7rem;}
+.nchip{font-family:'Cinzel',serif;font-size:.7rem;padding:.22rem .45rem;border-radius:2px;border:1px solid var(--border);background:var(--panel2);color:var(--ivory3);transition:all .18s;min-width:32px;text-align:center;}
+.nchip.cur{border-color:var(--gold);background:rgba(200,160,80,.14);color:var(--gold2);box-shadow:0 0 9px rgba(200,160,80,.3);}
+.nchip.ok{border-color:var(--green);background:rgba(46,204,113,.1);color:var(--green);}
+.nchip.bad{border-color:var(--red);background:rgba(231,76,60,.09);color:var(--red);}
+.prog-wrap{height:2px;background:var(--panel2);border-radius:2px;overflow:hidden;margin-top:.55rem;}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--gold3),var(--gold));border-radius:2px;transition:width .35s;}
+/* PIANO */
+.piano-wrap{background:var(--panel);border:1px solid var(--border);border-radius:3px;padding:.9rem .9rem .4rem;}
+.piano-inner-wrap{text-align:center;overflow-x:auto;}
+.piano-inner{display:inline-flex;background:linear-gradient(180deg,#1e1a12 0%,#0a0808 100%);border:1px solid rgba(200,160,80,.2);border-radius:4px 4px 10px 10px;padding:10px 12px 0;box-shadow:0 20px 55px rgba(0,0,0,.8),0 0 40px rgba(200,160,80,.03);}
+.og{position:relative;display:flex;}
+.wk{width:36px;height:152px;background:linear-gradient(180deg,#f5f0e6 0%,#e8e3d5 70%,#d5d0c2 100%);border:1px solid #aaa;border-top:none;border-radius:0 0 5px 5px;cursor:pointer;position:relative;z-index:1;transition:background .05s,transform .05s;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;user-select:none;box-shadow:inset 0 -2px 4px rgba(0,0,0,.1),1px 0 0 rgba(0,0,0,.06);}
+.wk:hover{background:linear-gradient(180deg,#fff 0%,#f5f0e6 100%);}
+.wk.pressed,.wk:active{background:linear-gradient(180deg,#e2ddd0 0%,#d0cbb8 100%);transform:scaleY(.998) translateY(1px);}
+.wk.hl{background:linear-gradient(180deg,#fff8cc 0%,#f0d860 100%);border-color:var(--gold);box-shadow:0 0 16px rgba(200,160,80,.6),inset 0 -2px 4px rgba(0,0,0,.1);}
+.wk.fok{background:linear-gradient(180deg,#c0f0c0 0%,#70d870 100%)!important;box-shadow:0 0 22px rgba(46,204,113,.7)!important;}
+.wk.fbad{background:linear-gradient(180deg,#f0c0c0 0%,#d87070 100%)!important;box-shadow:0 0 22px rgba(231,76,60,.7)!important;}
+.wk-lbl{font-size:8px;color:#888;font-family:'Cormorant Garamond',serif;pointer-events:none;}
+.bk{width:22px;height:94px;background:linear-gradient(180deg,#252018 0%,#151008 70%,#0a0805 100%);border:1px solid #000;border-top:none;border-radius:0 0 4px 4px;cursor:pointer;position:absolute;z-index:2;top:10px;transition:background .05s;box-shadow:2px 4px 8px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.04);user-select:none;}
+.bk:hover{background:linear-gradient(180deg,#352818 0%,#251808 100%);}
+.bk.pressed,.bk:active{background:#0a0808;transform:translateY(2px);}
+.bk.hl{background:linear-gradient(180deg,#5a4820 0%,#3a3010 100%);box-shadow:0 0 16px rgba(200,160,80,.6),2px 4px 8px rgba(0,0,0,.9);}
+.bk.fok{background:linear-gradient(180deg,#0f4518 0%,#082808 100%)!important;box-shadow:0 0 22px rgba(46,204,113,.8)!important;}
+.bk.fbad{background:linear-gradient(180deg,#451010 0%,#280808 100%)!important;box-shadow:0 0 22px rgba(231,76,60,.8)!important;}
+.kbd-hint{text-align:center;font-size:.7rem;color:var(--dim);padding:.3rem;letter-spacing:.04em;margin-top:.5rem;}
+.float-sym{position:fixed;pointer-events:none;font-family:'Cinzel',serif;font-size:1.4rem;opacity:1;animation:fup 1s ease-out forwards;z-index:9999;}
+@keyframes fup{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-65px) scale(.45)}}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="brand">Kawai CX101 — Interaktif Eğitici</div>
-  <h1>Piano <em>Öğretmeni</em></h1>
-</header>
+<div class="hdr">
+  <div class="hdr-brand">Kawai CX101 — İnteraktif Piano Eğitimi</div>
+  <h1>Piano <span>Maestro</span></h1>
+  <div class="hdr-line"></div>
+</div>
 
 <div class="app">
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar">
 
-  <!-- LESSON SELECTOR -->
-  <div class="lesson-panel">
-    <div class="panel-title">Ders Seç</div>
-    <div class="lesson-grid" id="lessonGrid"></div>
-  </div>
-
-  <!-- STATUS -->
-  <div class="status-bar">
-    <div class="stat">
-      <span class="stat-val" id="scoreVal">0</span>
-      <span class="stat-label">Puan</span>
-    </div>
-    <div class="divider-v"></div>
-    <div class="stat">
-      <span class="stat-val" id="streakVal">0</span>
-      <span class="stat-label">Seri</span>
-    </div>
-    <div class="divider-v"></div>
-    <div class="stat">
-      <span class="stat-val" id="progressVal">0/0</span>
-      <span class="stat-label">İlerleme</span>
-    </div>
-    <div class="feedback-area">
-      <div class="feedback-msg info" id="feedbackMsg">Bir ders seçerek başla</div>
-    </div>
-    <div class="mode-wrap">
-      <button class="mode-btn active" id="modeListen" onclick="setMode('listen')">Dinle</button>
-      <button class="mode-btn" id="modeFree" onclick="setMode('free')">Serbest</button>
+  <div class="mic-card">
+    <div class="sec-title">Mikrofon — Gerçek Zamanlı Perde Algılama</div>
+    <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+      <span class="mdot" id="mdot"></span>
+      <span id="micTxt">Mikrofonu Aç</span>
+    </button>
+    <div class="det-wrap">
+      <div class="det-note" id="detNote">—</div>
+      <div class="det-freq" id="detFreq">Nota bekleniyor...</div>
+      <div class="conf-wrap"><div class="conf-bar" id="confBar"></div></div>
     </div>
   </div>
 
-  <!-- TARGET NOTE -->
-  <div class="target-section">
-    <div class="target-label" id="targetLabel">Hedef Nota</div>
-    <div class="target-note" id="targetNote">—</div>
-    <div class="target-octave" id="targetOctave"></div>
-    <div class="chord-notes" id="chordNotes"></div>
-    <div class="target-hint" id="targetHint">Yukarıdan bir ders seç ve çalmaya başla</div>
-    <div class="staff-wrap"><canvas id="staffCanvas" width="300" height="100"></canvas></div>
-    <button class="listen-btn" id="listenBtn" onclick="playTargetSound()">♪ Sesi Dinle</button>
-    <button class="next-btn" id="nextBtn" onclick="nextNote()">Sonraki →</button>
-    <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+  <div class="score-card">
+    <div class="sc-item"><div class="sc-val" id="sv0">0</div><div class="sc-lbl">Puan</div></div>
+    <div class="sc-item"><div class="sc-val" id="sv1">0</div><div class="sc-lbl">Seri 🔥</div></div>
+    <div class="sc-item"><div class="sc-val" id="sv2">0</div><div class="sc-lbl">Doğru ✓</div></div>
+    <div class="sc-item"><div class="sc-val" id="sv3">0</div><div class="sc-lbl">Yanlış ✗</div></div>
   </div>
 
-  <!-- PIANO -->
-  <div class="piano-wrap" id="pianoWrap">
-    <div style="text-align:center;">
-      <div id="pianoContainer" class="piano-container"></div>
+  <div class="tabs">
+    <button class="tab-btn active" id="tabA" onclick="switchTab('lessons')">📚 Dersler</button>
+    <button class="tab-btn" id="tabB" onclick="switchTab('pieces')">🎵 Besteler</button>
+  </div>
+
+  <div class="lst" id="lst"></div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <div class="fb-banner">
+    <div class="fb-icon" id="fbI">🎹</div>
+    <div class="fb-txt info" id="fbT">Soldaki listeden bir ders veya beste seç, ardından mikrofonu aç</div>
+  </div>
+
+  <div class="sheet-card">
+    <div class="sh-hdr">
+      <div>
+        <div class="sh-title" id="shTitle">—</div>
+        <div class="sh-comp" id="shComp"></div>
+      </div>
+      <div class="sh-acts">
+        <button class="abtn" onclick="playDemo()">♪ Dinle</button>
+        <button class="abtn primary" onclick="startGame()">▶ Başlat</button>
+        <button class="abtn" onclick="resetGame()">↺ Sıfırla</button>
+      </div>
     </div>
+    <div class="score-scroll"><canvas id="sc" width="880" height="118"></canvas></div>
+    <div class="notes-row" id="nrow"></div>
+    <div class="prog-wrap"><div class="prog-bar" id="pgBar" style="width:0%"></div></div>
   </div>
-  <div class="kbd-hint">Klavye kısayolu: A S D F G H J = Do Re Mi Fa Sol La Si</div>
 
+  <div class="piano-wrap">
+    <div class="piano-inner-wrap">
+      <div class="piano-inner" id="pianoInner"></div>
+    </div>
+    <div class="kbd-hint">Klavye: <b>A S D F G H J</b> = Do Re Mi Fa Sol La Si (4. oktav)</div>
+  </div>
+
+</div>
 </div>
 
 <script>
-// ─────────────────────────────────────────────
-// NOTE DEFINITIONS — 88-key Kawai CX101
-// A0 to C8
-// ─────────────────────────────────────────────
-const NOTE_NAMES_TR = { C:'Do', 'C#':'Do#', D:'Re', 'D#':'Re#', E:'Mi', F:'Fa', 'F#':'Fa#', G:'Sol', 'G#':'Sol#', A:'La', 'A#':'La#', B:'Si' };
-const NOTE_NAMES_EN = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const WHITE_PATTERN  = ['C','D','E','F','G','A','B'];
-const BLACK_OFFSETS  = { 'C#':1,'D#':2,'F#':4,'G#':5,'A#':6 }; // index from first white of octave (0-based)
+/* ─── NOTE SYSTEM ─── */
+const EN=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const TR={C:'Do','C#':'Do#',D:'Re','D#':'Re#',E:'Mi',F:'Fa','F#':'Fa#',G:'Sol','G#':'Sol#',A:'La','A#':'La#',B:'Si'};
+const WHITE=['C','D','E','F','G','A','B'];
+const BKO={'C#':0,'D#':1,'F#':3,'G#':4,'A#':5};
 
-// Build all 88 keys: A0..C8
-function buildKeys() {
-  const keys = [];
-  // A0, A#0, B0
-  keys.push({note:'A', octave:0, freq: freqOf('A',0)});
-  keys.push({note:'A#', octave:0, freq: freqOf('A#',0)});
-  keys.push({note:'B', octave:0, freq: freqOf('B',0)});
-  for (let oct = 1; oct <= 7; oct++) {
-    for (const n of NOTE_NAMES_EN) {
-      keys.push({note:n, octave:oct, freq: freqOf(n,oct)});
-    }
-  }
-  // C8
-  keys.push({note:'C', octave:8, freq: freqOf('C',8)});
-  return keys;
+function midiOf(n,o){return(o+1)*12+EN.indexOf(n);}
+function freqOf(n,o){return 440*Math.pow(2,(midiOf(n,o)-69)/12);}
+function noteFromFreq(f){
+  if(f<40||f>2000)return null;
+  const m=Math.round(12*Math.log2(f/440)+69);
+  return{note:EN[((m%12)+12)%12],octave:Math.floor(m/12)-1,midi:m};
 }
 
-function freqOf(note, octave) {
-  const semis = NOTE_NAMES_EN.indexOf(note);
-  // A4 = 440Hz = MIDI 69
-  const midi = (octave+1)*12 + semis; // C-1 = 0
-  return 440 * Math.pow(2, (midi - 69) / 12);
-}
-
-const ALL_KEYS = buildKeys();
-
-// ─────────────────────────────────────────────
-// WEB AUDIO
-// ─────────────────────────────────────────────
-let audioCtx = null;
-function getAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return audioCtx;
-}
-
-function playNote(freq, duration = 1.2, vol = 0.5) {
-  const ctx = getAudio();
-  const osc = ctx.createOscillator();
-  const gainNode = ctx.createGain();
-  // Richer piano-like tone: mix sine + triangle
-  osc.type = 'triangle';
-  osc.frequency.setValueAtTime(freq, ctx.currentTime);
-
-  // Harmonics
-  const osc2 = ctx.createOscillator();
-  osc2.type = 'sine';
-  osc2.frequency.setValueAtTime(freq * 2, ctx.currentTime);
-  const gain2 = ctx.createGain();
-  gain2.gain.setValueAtTime(vol * 0.15, ctx.currentTime);
-
-  gainNode.gain.setValueAtTime(0, ctx.currentTime);
-  gainNode.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.01);
-  gainNode.gain.exponentialRampToValueAtTime(vol * 0.6, ctx.currentTime + 0.2);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-
-  osc.connect(gainNode);
-  osc2.connect(gain2);
-  gain2.connect(ctx.destination);
-  gainNode.connect(ctx.destination);
-
-  osc.start(ctx.currentTime);
-  osc2.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + duration + 0.1);
-  osc2.stop(ctx.currentTime + duration + 0.1);
-}
-
-function playChord(freqs, duration = 1.5) {
-  freqs.forEach((f, i) => {
-    setTimeout(() => playNote(f, duration - i * 0.05, 0.35), i * 30);
-  });
-}
-
-// ─────────────────────────────────────────────
-// LESSONS
-// ─────────────────────────────────────────────
-const LESSONS = [
-  {
-    id: 'white_c4', name: 'Do Oktav (4)', desc: 'Orta Do oktavının beyaz tuşları',
-    type: 'notes',
-    notes: [
-      {note:'C',octave:4},{note:'D',octave:4},{note:'E',octave:4},{note:'F',octave:4},
-      {note:'G',octave:4},{note:'A',octave:4},{note:'B',octave:4}
-    ]
-  },
-  {
-    id: 'white_c5', name: 'Do Oktav (5)', desc: 'Bir üst oktavın beyaz tuşları',
-    type: 'notes',
-    notes: [
-      {note:'C',octave:5},{note:'D',octave:5},{note:'E',octave:5},{note:'F',octave:5},
-      {note:'G',octave:5},{note:'A',octave:5},{note:'B',octave:5}
-    ]
-  },
-  {
-    id: 'black_c4', name: 'Siyah Tuşlar (4)', desc: '4. oktavın siyah tuşları (diyez)',
-    type: 'notes',
-    notes: [
-      {note:'C#',octave:4},{note:'D#',octave:4},{note:'F#',octave:4},
-      {note:'G#',octave:4},{note:'A#',octave:4}
-    ]
-  },
-  {
-    id: 'all_c4', name: 'Tüm Tuşlar (4)', desc: '4. oktavın tüm tuşları',
-    type: 'notes',
-    notes: NOTE_NAMES_EN.map(n => ({note:n, octave:4}))
-  },
-  {
-    id: 'do_re_mi', name: 'Do Re Mi', desc: 'Temel nota sırası',
-    type: 'sequence',
-    notes: [
-      {note:'C',octave:4},{note:'D',octave:4},{note:'E',octave:4},
-      {note:'F',octave:4},{note:'G',octave:4},{note:'A',octave:4},
-      {note:'B',octave:4},{note:'C',octave:5}
-    ]
-  },
-  {
-    id: 'chords_major', name: 'Majör Akorlar', desc: 'Do, Fa, Sol majör',
-    type: 'chords',
-    notes: [
-      {name:'Do Majör', chord:[{note:'C',octave:4},{note:'E',octave:4},{note:'G',octave:4}]},
-      {name:'Fa Majör', chord:[{note:'F',octave:4},{note:'A',octave:4},{note:'C',octave:5}]},
-      {name:'Sol Majör', chord:[{note:'G',octave:4},{note:'B',octave:4},{note:'D',octave:5}]},
-      {name:'Re Minör', chord:[{note:'D',octave:4},{note:'F',octave:4},{note:'A',octave:4}]},
-    ]
-  },
-  {
-    id: 'two_octaves', name: '2 Oktav Çalışması', desc: '4. ve 5. oktav beraber',
-    type: 'notes',
-    notes: [
-      ...NOTE_NAMES_EN.map(n=>({note:n,octave:4})),
-      ...NOTE_NAMES_EN.map(n=>({note:n,octave:5}))
-    ]
-  },
-  {
-    id: 'interval_thirds', name: 'Aralık: 3lü', desc: 'Üçlü aralık tanıma',
-    type: 'notes',
-    notes: [
-      {note:'C',octave:4},{note:'E',octave:4},{note:'D',octave:4},{note:'F',octave:4},
-      {note:'E',octave:4},{note:'G',octave:4},{note:'F',octave:4},{note:'A',octave:4},
-      {note:'G',octave:4},{note:'B',octave:4}
-    ]
-  },
-  {
-    id: 'random_4', name: 'Karışık (4. Oktav)', desc: 'Rastgele soru modu',
-    type: 'random',
-    notes: NOTE_NAMES_EN.map(n => ({note:n, octave:4}))
-  },
-  {
-    id: 'random_45', name: 'Karışık (4–5)', desc: '4. ve 5. oktav rastgele',
-    type: 'random',
-    notes: [
-      ...NOTE_NAMES_EN.map(n=>({note:n,octave:4})),
-      ...NOTE_NAMES_EN.map(n=>({note:n,octave:5}))
-    ]
-  },
+/* ─── 20 PIECES ─── */
+const PIECES=[
+  {name:"Twinkle Twinkle Little Star",comp:"Geleneksel",notes:[
+    {n:'C',o:4},{n:'C',o:4},{n:'G',o:4},{n:'G',o:4},{n:'A',o:4},{n:'A',o:4},{n:'G',o:4,d:700},
+    {n:'F',o:4},{n:'F',o:4},{n:'E',o:4},{n:'E',o:4},{n:'D',o:4},{n:'D',o:4},{n:'C',o:4,d:700},
+    {n:'G',o:4},{n:'G',o:4},{n:'F',o:4},{n:'F',o:4},{n:'E',o:4},{n:'E',o:4},{n:'D',o:4,d:700},
+    {n:'G',o:4},{n:'G',o:4},{n:'F',o:4},{n:'F',o:4},{n:'E',o:4},{n:'E',o:4},{n:'D',o:4,d:700},
+    {n:'C',o:4},{n:'C',o:4},{n:'G',o:4},{n:'G',o:4},{n:'A',o:4},{n:'A',o:4},{n:'G',o:4,d:700},
+    {n:'F',o:4},{n:'F',o:4},{n:'E',o:4},{n:'E',o:4},{n:'D',o:4},{n:'D',o:4},{n:'C',o:4,d:900}]},
+  {name:"Jingle Bells",comp:"J. Pierpont",notes:[
+    {n:'E',o:4},{n:'E',o:4},{n:'E',o:4,d:600},{n:'E',o:4},{n:'E',o:4},{n:'E',o:4,d:600},
+    {n:'E',o:4},{n:'G',o:4},{n:'C',o:4},{n:'D',o:4},{n:'E',o:4,d:800},
+    {n:'F',o:4},{n:'F',o:4},{n:'F',o:4},{n:'F',o:4,d:600},
+    {n:'F',o:4},{n:'E',o:4},{n:'E',o:4},{n:'E',o:4,d:400},
+    {n:'G',o:4},{n:'G',o:4},{n:'F',o:4},{n:'D',o:4},{n:'C',o:4,d:900}]},
+  {name:"Happy Birthday",comp:"Hill Kardeşler",notes:[
+    {n:'C',o:4},{n:'C',o:4},{n:'D',o:4},{n:'C',o:4},{n:'F',o:4},{n:'E',o:4,d:700},
+    {n:'C',o:4},{n:'C',o:4},{n:'D',o:4},{n:'C',o:4},{n:'G',o:4},{n:'F',o:4,d:700},
+    {n:'C',o:4},{n:'C',o:4},{n:'C',o:5},{n:'A',o:4},{n:'F',o:4},{n:'E',o:4},{n:'D',o:4,d:700},
+    {n:'A#',o:4},{n:'A#',o:4},{n:'A',o:4},{n:'F',o:4},{n:'G',o:4},{n:'F',o:4,d:900}]},
+  {name:"Ode to Joy",comp:"L.v. Beethoven",notes:[
+    {n:'E',o:4},{n:'E',o:4},{n:'F',o:4},{n:'G',o:4},{n:'G',o:4},{n:'F',o:4},{n:'E',o:4},{n:'D',o:4},
+    {n:'C',o:4},{n:'C',o:4},{n:'D',o:4},{n:'E',o:4},{n:'E',o:4,d:600},{n:'D',o:4,d:600},{n:'D',o:4,d:700},
+    {n:'E',o:4},{n:'E',o:4},{n:'F',o:4},{n:'G',o:4},{n:'G',o:4},{n:'F',o:4},{n:'E',o:4},{n:'D',o:4},
+    {n:'C',o:4},{n:'C',o:4},{n:'D',o:4},{n:'E',o:4},{n:'D',o:4,d:600},{n:'C',o:4,d:600},{n:'C',o:4,d:900}]},
+  {name:"Mary Had a Little Lamb",comp:"S. Hale",notes:[
+    {n:'E',o:4},{n:'D',o:4},{n:'C',o:4},{n:'D',o:4},{n:'E',o:4},{n:'E',o:4},{n:'E',o:4,d:700},
+    {n:'D',o:4},{n:'D',o:4},{n:'D',o:4,d:700},{n:'E',o:4},{n:'G',o:4},{n:'G',o:4,d:700},
+    {n:'E',o:4},{n:'D',o:4},{n:'C',o:4},{n:'D',o:4},{n:'E',o:4},{n:'E',o:4},{n:'E',o:4},{n:'E',o:4},
+    {n:'D',o:4},{n:'D',o:4},{n:'E',o:4},{n:'D',o:4},{n:'C',o:4,d:900}]},
+  {name:"Für Elise (Giriş)",comp:"L.v. Beethoven",notes:[
+    {n:'E',o:5},{n:'D#',o:5},{n:'E',o:5},{n:'D#',o:5},{n:'E',o:5},{n:'B',o:4},{n:'D',o:5},{n:'C',o:5},
+    {n:'A',o:4,d:700},{n:'C',o:4},{n:'E',o:4},{n:'A',o:4},{n:'B',o:4,d:700},
+    {n:'E',o:4},{n:'G#',o:4},{n:'B',o:4},{n:'C',o:5,d:700},
+    {n:'E',o:4},{n:'E',o:5},{n:'D#',o:5},{n:'E',o:5},{n:'D#',o:5},{n:'E',o:5},
+    {n:'B',o:4},{n:'D',o:5},{n:'C',o:5},{n:'A',o:4,d:900}]},
+  {name:"Frère Jacques",comp:"Fransız Halk",notes:[
+    {n:'C',o:4},{n:'D',o:4},{n:'E',o:4},{n:'C',o:4},{n:'C',o:4},{n:'D',o:4},{n:'E',o:4},{n:'C',o:4},
+    {n:'E',o:4},{n:'F',o:4},{n:'G',o:4,d:700},{n:'E',o:4},{n:'F',o:4},{n:'G',o:4,d:700},
+    {n:'G',o:4},{n:'A',o:4},{n:'G',o:4},{n:'F',o:4},{n:'E',o:4},{n:'C',o:4},
+    {n:'G',o:4},{n:'A',o:4},{n:'G',o:4},{n:'F',o:4},{n:'E',o:4},{n:'C',o:4},
+    {n:'C',o:4},{n:'G',o:3},{n:'C',o:4,d:900}]},
+  {name:"London Bridge",comp:"Geleneksel İngiliz",notes:[
+    {n:'G',o:4},{n:'A',o:4},{n:'G',o:4},{n:'F',o:4},{n:'E',o:4},{n:'F',o:4},{n:'G',o:4,d:600},
+    {n:'D',o:4},{n:'E',o:4},{n:'F',o:4,d:600},{n:'E',o:4},{n:'F',o:4},{n:'G',o:4,d:600},
+    {n:'G',o:4},{n:'A',o:4},{n:'G',o:4},{n:'F',o:4},{n:'E',o:4},{n:'F',o:4},{n:'G',o:4,d:600},
+    {n:'D',o:4,d:400},{n:'G',o:4},{n:'E',o:4},{n:'C',o:4,d:900}]},
+  {name:"Minuet in G",comp:"J.S. Bach",notes:[
+    {n:'G',o:4,d:600},{n:'C',o:5},{n:'D',o:5},{n:'E',o:5},{n:'F',o:5},{n:'G',o:5,d:600},
+    {n:'G',o:4,d:600},{n:'D',o:5},{n:'E',o:5},{n:'F#',o:5},{n:'G',o:5},{n:'A',o:5,d:600},
+    {n:'B',o:4,d:400},{n:'C',o:5},{n:'D',o:5},{n:'G',o:4,d:400},{n:'E',o:5,d:400},{n:'C',o:5,d:400},{n:'D',o:5},{n:'B',o:4,d:800},
+    {n:'C',o:5},{n:'D',o:5},{n:'E',o:5},{n:'C',o:5},{n:'A',o:4},{n:'B',o:4},{n:'C',o:5},{n:'A',o:4},
+    {n:'D',o:5},{n:'E',o:5},{n:'F#',o:5},{n:'D',o:5},{n:'G',o:5,d:900}]},
+  {name:"Row Your Boat",comp:"Geleneksel",notes:[
+    {n:'C',o:4,d:600},{n:'C',o:4,d:600},{n:'C',o:4},{n:'D',o:4},{n:'E',o:4,d:600},
+    {n:'E',o:4},{n:'D',o:4},{n:'E',o:4},{n:'F',o:4},{n:'G',o:4,d:800},
+    {n:'C',o:5},{n:'C',o:5},{n:'C',o:5},{n:'G',o:4},{n:'G',o:4},{n:'G',o:4},{n:'E',o:4},{n:'E',o:4},{n:'E',o:4},
+    {n:'C',o:4},{n:'C',o:4},{n:'C',o:4},{n:'G',o:4},{n:'F',o:4},{n:'E',o:4},{n:'D',o:4},{n:'C',o:4,d:900}]},
+  {name:"Do Re Mi (Sound of Music)",comp:"Rodgers & Hammerstein",notes:[
+    {n:'C',o:4,d:500},{n:'D',o:4,d:500},{n:'E',o:4},{n:'C',o:4,d:500},{n:'E',o:4},{n:'C',o:4},{n:'E',o:4,d:700},
+    {n:'D',o:4},{n:'E',o:4,d:300},{n:'F',o:4,d:300},{n:'E',o:4,d:300},{n:'D',o:4},{n:'F',o:4,d:700},
+    {n:'E',o:4},{n:'F',o:4,d:300},{n:'G',o:4,d:300},{n:'F',o:4,d:300},{n:'E',o:4},{n:'G',o:4,d:700},
+    {n:'F',o:4},{n:'G',o:4,d:300},{n:'A',o:4,d:300},{n:'G',o:4,d:300},{n:'F',o:4},{n:'A',o:4,d:700},
+    {n:'A',o:4,d:300},{n:'B',o:4,d:300},{n:'C',o:5,d:300},{n:'B',o:4,d:300},{n:'A',o:4},{n:'C',o:5,d:900}]},
+  {name:"Old MacDonald",comp:"Geleneksel",notes:[
+    {n:'G',o:4},{n:'G',o:4},{n:'G',o:4},{n:'D',o:4},{n:'E',o:4},{n:'E',o:4},{n:'D',o:4,d:700},
+    {n:'B',o:4},{n:'B',o:4},{n:'A',o:4},{n:'A',o:4},{n:'G',o:4,d:900},
+    {n:'D',o:4,d:600},{n:'G',o:4},{n:'G',o:4},{n:'G',o:4},{n:'D',o:4},{n:'E',o:4},{n:'E',o:4},{n:'D',o:4,d:700},
+    {n:'B',o:4},{n:'B',o:4},{n:'A',o:4},{n:'A',o:4},{n:'G',o:4,d:900}]},
+  {name:"Çoban Yıldızı",comp:"M. Sarısözen",notes:[
+    {n:'A',o:4,d:600},{n:'G',o:4,d:400},{n:'A',o:4,d:600},
+    {n:'E',o:5,d:600},{n:'D',o:5,d:400},{n:'E',o:5,d:600},
+    {n:'C',o:5,d:400},{n:'B',o:4,d:400},{n:'A',o:4,d:600},
+    {n:'G',o:4,d:400},{n:'F',o:4,d:400},{n:'E',o:4,d:600},
+    {n:'A',o:4,d:600},{n:'A',o:4,d:400},{n:'B',o:4,d:600},
+    {n:'E',o:5,d:400},{n:'D',o:5,d:400},{n:'C',o:5,d:400},{n:'B',o:4,d:600},{n:'A',o:4,d:900}]},
+  {name:"Ay Işığı Sonatı (Giriş)",comp:"L.v. Beethoven",notes:[
+    {n:'C#',o:4},{n:'E',o:4},{n:'G#',o:4},{n:'C#',o:4},{n:'E',o:4},{n:'G#',o:4,d:600},
+    {n:'B',o:3},{n:'E',o:4},{n:'G#',o:4},{n:'B',o:3},{n:'E',o:4},{n:'G#',o:4,d:600},
+    {n:'A',o:3},{n:'E',o:4},{n:'A',o:4},{n:'A',o:3},{n:'E',o:4},{n:'A',o:4,d:600},
+    {n:'A',o:3},{n:'D#',o:4},{n:'G#',o:4},{n:'A',o:3},{n:'D#',o:4},{n:'G#',o:4,d:600},
+    {n:'G#',o:3},{n:'D#',o:4},{n:'G#',o:4},{n:'G#',o:3},{n:'D#',o:4},{n:'G#',o:4,d:900}]},
+  {name:"Itsy Bitsy Spider",comp:"Geleneksel",notes:[
+    {n:'C',o:4},{n:'F',o:4},{n:'F',o:4},{n:'F',o:4},{n:'G',o:4},{n:'A',o:4,d:700},
+    {n:'A',o:4},{n:'G',o:4},{n:'A',o:4},{n:'F',o:4,d:700},
+    {n:'C',o:5},{n:'C',o:5},{n:'B',o:4},{n:'A',o:4},{n:'G',o:4},{n:'F',o:4,d:700},
+    {n:'A',o:4},{n:'G',o:4},{n:'F',o:4,d:900}]},
+  {name:"Ateşböceği",comp:"Türk Çocuk Şarkısı",notes:[
+    {n:'E',o:4},{n:'E',o:4},{n:'F',o:4},{n:'G',o:4},{n:'G',o:4},{n:'F',o:4},{n:'E',o:4},{n:'D',o:4},
+    {n:'C',o:4},{n:'C',o:4},{n:'D',o:4},{n:'E',o:4},{n:'E',o:4,d:600},{n:'D',o:4,d:600},{n:'D',o:4,d:700},
+    {n:'E',o:4},{n:'E',o:4},{n:'F',o:4},{n:'G',o:4},{n:'G',o:4},{n:'F',o:4},{n:'E',o:4},{n:'D',o:4},
+    {n:'C',o:4},{n:'C',o:4},{n:'D',o:4},{n:'E',o:4},{n:'C',o:4,d:900}]},
+  {name:"Kelebek",comp:"Türk Halk Ezgisi",notes:[
+    {n:'G',o:4},{n:'G',o:4},{n:'A',o:4},{n:'G',o:4},{n:'E',o:4,d:600},
+    {n:'E',o:4},{n:'G',o:4},{n:'A',o:4},{n:'G',o:4},{n:'D',o:4,d:600},
+    {n:'G',o:4},{n:'G',o:4},{n:'G',o:5},{n:'E',o:5},{n:'D',o:5},{n:'C',o:5},{n:'B',o:4,d:600},
+    {n:'A',o:4},{n:'A',o:4},{n:'B',o:4},{n:'A',o:4},{n:'G',o:4,d:900}]},
+  {name:"Amazing Grace (Giriş)",comp:"J. Newton",notes:[
+    {n:'G',o:4,d:500},{n:'C',o:5,d:700},{n:'E',o:5,d:400},{n:'C',o:5,d:500},
+    {n:'E',o:5,d:700},{n:'D',o:5,d:800},
+    {n:'C',o:5,d:700},{n:'A',o:4,d:400},{n:'G',o:4,d:500},
+    {n:'G',o:4,d:500},{n:'C',o:5,d:700},{n:'E',o:5,d:400},{n:'C',o:5,d:500},
+    {n:'G',o:5,d:700},{n:'E',o:5,d:900},
+    {n:'D',o:5,d:700},{n:'E',o:5,d:400},{n:'D',o:5,d:500},{n:'C',o:5,d:900}]},
+  {name:"Scarborough Fair (Giriş)",comp:"İngiliz Halk",notes:[
+    {n:'A',o:4,d:700},{n:'C',o:5,d:400},{n:'D',o:5,d:700},
+    {n:'D',o:5,d:400},{n:'C',o:5,d:400},{n:'D',o:5,d:400},{n:'E',o:5,d:700},
+    {n:'C',o:5,d:700},{n:'A',o:4,d:700},
+    {n:'G',o:4,d:400},{n:'A',o:4,d:400},{n:'C',o:5,d:400},{n:'A',o:4,d:700},
+    {n:'G',o:4,d:900}]},
+  {name:"Valse Müinyatür",comp:"Orijinal",notes:[
+    {n:'C',o:4},{n:'E',o:4},{n:'G',o:4},{n:'C',o:5,d:600},
+    {n:'B',o:4},{n:'G',o:4},{n:'E',o:4},{n:'C',o:4,d:600},
+    {n:'D',o:4},{n:'F',o:4},{n:'A',o:4},{n:'D',o:5,d:600},
+    {n:'C',o:5},{n:'A',o:4},{n:'F',o:4},{n:'D',o:4,d:600},
+    {n:'E',o:4},{n:'G',o:4},{n:'C',o:5},{n:'E',o:5,d:600},
+    {n:'D',o:5},{n:'B',o:4},{n:'G',o:4},{n:'E',o:4,d:600},
+    {n:'F',o:4},{n:'A',o:4},{n:'C',o:5},{n:'F',o:5,d:600},
+    {n:'E',o:5},{n:'C',o:5},{n:'G',o:4},{n:'C',o:4,d:900}]}
 ];
 
-// ─────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────
-let currentLesson = null;
-let currentIndex = 0;
-let score = 0;
-let streak = 0;
-let mode = 'listen'; // 'listen' | 'free'
-let waitingForNext = false;
-let lessonQueue = [];
-let pressedKeys = new Set(); // for chord mode
+const LESSONS=[
+  {name:'Do Oktav (4)',sub:'Beyaz tuşlar — orta oktav',type:'list',items:['C','D','E','F','G','A','B'].map(n=>({n,o:4}))},
+  {name:'Do Oktav (5)',sub:'Bir üst oktav beyaz tuşlar',type:'list',items:['C','D','E','F','G','A','B'].map(n=>({n,o:5}))},
+  {name:'Siyah Tuşlar (4)',sub:'5 diyez nota',type:'list',items:['C#','D#','F#','G#','A#'].map(n=>({n,o:4}))},
+  {name:'Tüm 4. Oktav',sub:'12 nota',type:'list',items:EN.map(n=>({n,o:4}))},
+  {name:'İki Oktav (3–4)',sub:'24 nota',type:'list',items:[...EN.map(n=>({n,o:3})),...EN.map(n=>({n,o:4}))]},
+  {name:'Karışık Test',sub:'Rastgele 16 nota',type:'random',items:EN.map(n=>({n,o:4}))},
+];
 
-// ─────────────────────────────────────────────
-// BUILD PIANO (show octaves 3–6 for usability, full highlight support)
-// ─────────────────────────────────────────────
-const SHOW_OCTAVES = [3, 4, 5, 6];
+/* ─── STATE ─── */
+let queue=[],qIdx=0,results=[],started=false;
+let pts=0,streak=0,cor=0,wrg=0;
+let curType=null,curItem=null;
+let micOn=false,audioCtx=null,analyser=null,micSrc=null,micStream=null,rafId=null;
+let lastOkTime=0,lastBadTime=0;
+const pitchHist=[];
 
-function buildPiano() {
-  const container = document.getElementById('pianoContainer');
-  container.innerHTML = '';
+/* ─── AUDIO ─── */
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(f,dur=1,vol=0.42){
+  const ctx=getCtx();
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  const o2=ctx.createOscillator(),g2=ctx.createGain();
+  o.type='triangle';o.frequency.value=f;
+  o2.type='sine';o2.frequency.value=f*2;g2.gain.value=vol*.1;
+  g.gain.setValueAtTime(0,ctx.currentTime);
+  g.gain.linearRampToValueAtTime(vol,ctx.currentTime+.012);
+  g.gain.exponentialRampToValueAtTime(vol*.5,ctx.currentTime+.28);
+  g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+dur);
+  o.connect(g);o2.connect(g2);g.connect(ctx.destination);g2.connect(ctx.destination);
+  o.start();o2.start();o.stop(ctx.currentTime+dur+.05);o2.stop(ctx.currentTime+dur+.05);
+}
 
-  SHOW_OCTAVES.forEach(oct => {
-    const group = document.createElement('div');
-    group.className = 'octave-group';
-
-    const whites = WHITE_PATTERN;
-    // Position black keys relative to white keys
-    const blackPositions = {
-      'C#': 0, 'D#': 1, 'F#': 3, 'G#': 4, 'A#': 5
-    };
-    const wKeyW = 42;
-
-    whites.forEach((wn, wi) => {
-      const key = document.createElement('div');
-      key.className = 'white-key';
-      key.id = `key_${wn}${oct}`;
-      key.dataset.note = wn;
-      key.dataset.octave = oct;
-      const label = document.createElement('span');
-      label.className = 'key-label';
-      label.textContent = NOTE_NAMES_TR[wn];
-      key.appendChild(label);
-      key.addEventListener('mousedown', () => handleKeyPress(wn, oct));
-      key.addEventListener('touchstart', e => { e.preventDefault(); handleKeyPress(wn, oct); }, {passive:false});
-      group.appendChild(key);
+/* ─── MIC / PITCH ─── */
+async function toggleMic(){
+  if(micOn){stopMic();return;}
+  try{
+    const ctx=getCtx();
+    if(ctx.state==='suspended')await ctx.resume();
+    const stream=await navigator.mediaDevices.getUserMedia({
+      audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}
     });
+    micStream=stream;
+    analyser=ctx.createAnalyser();
+    analyser.fftSize=4096;
+    analyser.smoothingTimeConstant=0.15;
+    micSrc=ctx.createMediaStreamSource(stream);
+    micSrc.connect(analyser);
+    micOn=true;
+    document.getElementById('micBtn').classList.add('active');
+    document.getElementById('micTxt').textContent='Mikrofon Açık — Dinleniyor';
+    pitchLoop();
+  }catch(e){
+    setFb('❌','Mikrofon erişimi reddedildi: '+e.message,'bad');
+  }
+}
+function stopMic(){
+  micOn=false;
+  if(rafId){cancelAnimationFrame(rafId);rafId=null;}
+  if(micSrc){micSrc.disconnect();micSrc=null;}
+  if(micStream){micStream.getTracks().forEach(t=>t.stop());micStream=null;}
+  analyser=null;
+  document.getElementById('micBtn').classList.remove('active');
+  document.getElementById('micTxt').textContent='Mikrofonu Aç';
+  document.getElementById('detNote').textContent='—';
+  document.getElementById('detFreq').textContent='Nota bekleniyor...';
+  document.getElementById('confBar').style.width='0%';
+}
 
-    // Black keys
-    Object.entries(blackPositions).forEach(([bn, pos]) => {
-      const key = document.createElement('div');
-      key.className = 'black-key';
-      key.id = `key_${bn}${oct}`;
-      key.dataset.note = bn;
-      key.dataset.octave = oct;
-      // Position: pos * wKeyW + wKeyW - 13 (center between whites)
-      key.style.left = (pos * wKeyW + wKeyW - 13) + 'px';
-      key.addEventListener('mousedown', () => handleKeyPress(bn, oct));
-      key.addEventListener('touchstart', e => { e.preventDefault(); handleKeyPress(bn, oct); }, {passive:false});
-      group.appendChild(key);
-    });
+const tmpBuf=()=>new Float32Array(analyser?analyser.fftSize:4096);
+function pitchLoop(){
+  const buf=tmpBuf();
+  (function loop(){
+    if(!micOn)return;
+    rafId=requestAnimationFrame(loop);
+    analyser.getFloatTimeDomainData(buf);
+    const{pitch,conf}=autoCorr(buf,getCtx().sampleRate);
+    onPitch(pitch,conf);
+  })();
+}
 
-    container.appendChild(group);
+function autoCorr(buf,sr){
+  let rms=0;for(let i=0;i<buf.length;i++)rms+=buf[i]*buf[i];
+  rms=Math.sqrt(rms/buf.length);
+  if(rms<0.012)return{pitch:-1,conf:0};
+  let r1=0,r2=buf.length-1;
+  for(let i=0;i<buf.length/2;i++){if(buf[i]<0){r1=i;break;}}
+  for(let i=1;i<buf.length/2;i++){if(buf[buf.length-i]<0){r2=buf.length-i;break;}}
+  const t=buf.slice(r1,r2);const n=t.length;
+  if(n<8)return{pitch:-1,conf:0};
+  const c=new Float32Array(n);
+  for(let i=0;i<n;i++)for(let j=0;j<n-i;j++)c[i]+=t[j]*t[j+i];
+  let d=0;while(d<n&&c[d]>c[d+1])d++;
+  let mx=-Infinity,mp=-1;
+  for(let i=d;i<n;i++){if(c[i]>mx){mx=c[i];mp=i;}}
+  if(mp<=0||c[0]===0)return{pitch:-1,conf:0};
+  const y1=c[mp-1]||0,y2=c[mp],y3=c[mp+1]||0;
+  const a=(y1+y3-2*y2)*.5,b=(y3-y1)*.5;
+  const ref=a?mp-b/(2*a):mp;
+  return{pitch:sr/ref,conf:Math.min(1,mx/c[0])};
+}
+
+function onPitch(pitch,conf){
+  document.getElementById('confBar').style.width=(conf*100)+'%';
+  if(pitch<50||pitch>1600||conf<0.88)return;
+  pitchHist.push(pitch);if(pitchHist.length>6)pitchHist.shift();
+  const avg=pitchHist.reduce((a,b)=>a+b,0)/pitchHist.length;
+  const det=noteFromFreq(avg);if(!det)return;
+  const nEl=document.getElementById('detNote');
+  const fEl=document.getElementById('detFreq');
+  fEl.textContent=`${det.note}${det.octave} — ${avg.toFixed(1)} Hz  |  güven: ${Math.round(conf*100)}%`;
+
+  if(started&&qIdx<queue.length){
+    const tgt=queue[qIdx];
+    const ok=(det.note===tgt.n&&det.octave===tgt.o);
+    nEl.className='det-note '+(ok?'match':'nomatch');
+    nEl.textContent=(TR[det.note]||det.note)+det.octave;
+    const now=Date.now();
+    if(ok&&now-lastOkTime>550){lastOkTime=now;doCorrect();}
+    else if(!ok&&conf>0.92&&now-lastBadTime>750){lastBadTime=now;doWrong(det);}
+  }else{
+    nEl.className='det-note';
+    nEl.textContent=(TR[det.note]||det.note)+det.octave;
+  }
+}
+
+/* ─── GAME ─── */
+function doCorrect(){
+  if(qIdx>=queue.length)return;
+  const t=queue[qIdx];
+  results[qIdx]='ok';
+  pts+=10+streak*3;streak++;cor++;
+  updScore();
+  flashK(t.n,t.o,'fok');
+  spawnFloat('✓',t.n,t.o,'#2ecc71');
+  const msgs=['Harika!','Mükemmel! 🎶','Süper! ✨','Bravo!','Tam isabet! 🎯','Enfes!','Evet!'];
+  setFb('✅',msgs[Math.floor(Math.random()*msgs.length)],'ok');
+  qIdx++;updProg();drawSc();
+  if(qIdx>=queue.length)setTimeout(complete,500);
+}
+function doWrong(det){
+  if(qIdx>=queue.length||results[qIdx]==='ok')return;
+  if(results[qIdx]==='bad')return; // already counted
+  results[qIdx]='bad';
+  streak=0;wrg++;updScore();
+  flashK(det.note,det.octave,'fbad');
+  spawnFloat('✗',det.note,det.octave,'#e74c3c');
+  const t=queue[qIdx];
+  setFb('❌',`Yanlış nota! ${TR[det.note]||det.note}${det.octave} ≠ Hedef: ${TR[t.n]||t.n}${t.o}`,'bad');
+}
+function complete(){
+  started=false;
+  const pct=cor+wrg>0?Math.round(cor/(cor+wrg)*100):100;
+  setFb('🏆',`Tamamlandı! ${pts} puan · Doğruluk: %${pct} · Seri: ${streak}`,'ok');
+  clearHl();
+}
+function startGame(){
+  if(!queue.length){setFb('⚠️','Önce bir ders veya beste seç!','bad');return;}
+  started=true;qIdx=0;pts=0;streak=0;cor=0;wrg=0;
+  results=queue.map(()=>'pending');
+  lastOkTime=0;lastBadTime=0;
+  updScore();updProg();drawSc();
+  clearHl();hlK(queue[0].n,queue[0].o);
+  setFb(micOn?'🎤':'🎹',micOn?'Çalmaya başla! İlk nota: '+(TR[queue[0].n]||queue[0].n)+queue[0].o:'Mikrofonu aç ve çalmaya başla!','info');
+}
+function resetGame(){
+  started=false;qIdx=0;pts=0;streak=0;cor=0;wrg=0;
+  results=queue.map(()=>'pending');
+  updScore();updProg();drawSc();clearHl();
+  if(queue.length)hlK(queue[0].n,queue[0].o);
+  setFb('🎹','Sıfırlandı. Başlat\'a bas.','info');
+}
+function updScore(){
+  document.getElementById('sv0').textContent=pts;
+  document.getElementById('sv1').textContent=streak;
+  document.getElementById('sv2').textContent=cor;
+  document.getElementById('sv3').textContent=wrg;
+}
+function updProg(){
+  const p=queue.length?qIdx/queue.length*100:0;
+  document.getElementById('pgBar').style.width=p+'%';
+  buildNrow();clearHl();if(qIdx<queue.length)hlK(queue[qIdx].n,queue[qIdx].o);
+}
+
+/* ─── DEMO PLAY ─── */
+function playDemo(){
+  if(!queue.length)return;
+  let t=0;
+  queue.forEach(item=>{
+    const dur=(item.d||300)/1000;
+    setTimeout(()=>playTone(freqOf(item.n,item.o),dur*1.1,.36),t);
+    t+=(item.d||280);
   });
 }
 
-// ─────────────────────────────────────────────
-// KEYBOARD SHORTCUTS (A=C4, S=D4, D=E4, F=F4, G=G4, H=A4, J=B4)
-// ─────────────────────────────────────────────
-const KB_MAP = {a:'C',s:'D',d:'E',f:'F',g:'G',h:'A',j:'B'};
-const KB_OCT = 4;
-
-document.addEventListener('keydown', e => {
-  if (e.repeat) return;
-  const n = KB_MAP[e.key.toLowerCase()];
-  if (n) handleKeyPress(n, KB_OCT);
-});
-
-// ─────────────────────────────────────────────
-// LESSON SETUP
-// ─────────────────────────────────────────────
-function buildLessonGrid() {
-  const grid = document.getElementById('lessonGrid');
-  grid.innerHTML = '';
-  LESSONS.forEach(l => {
-    const btn = document.createElement('button');
-    btn.className = 'lesson-btn';
-    btn.id = 'lesson_' + l.id;
-    btn.innerHTML = `<strong>${l.name}</strong><br><small style="font-size:0.78rem;opacity:0.7">${l.desc}</small>`;
-    btn.onclick = () => startLesson(l);
-    grid.appendChild(btn);
-  });
-}
-
-function startLesson(lesson) {
-  document.querySelectorAll('.lesson-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('lesson_' + lesson.id).classList.add('active');
-
-  currentLesson = lesson;
-  currentIndex = 0;
-  score = 0;
-  streak = 0;
-  waitingForNext = false;
-  pressedKeys.clear();
-
-  // Build queue
-  if (lesson.type === 'random') {
-    lessonQueue = shuffle([...lesson.notes, ...lesson.notes, ...lesson.notes]).slice(0, 20);
-  } else {
-    lessonQueue = [...lesson.notes];
-  }
-
-  updateScoreUI();
-  showCurrentTarget();
-  setFeedback('Çalmaya başla!', 'info');
-}
-
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function showCurrentTarget() {
-  if (!currentLesson || currentIndex >= lessonQueue.length) {
-    lessonComplete();
-    return;
-  }
-
-  clearHighlights();
-  waitingForNext = false;
-  document.getElementById('nextBtn').classList.remove('visible');
-  pressedKeys.clear();
-
-  const item = lessonQueue[currentIndex];
-  const total = lessonQueue.length;
-
-  document.getElementById('progressVal').textContent = `${currentIndex + 1}/${total}`;
-  document.getElementById('progressBar').style.width = `${(currentIndex / total) * 100}%`;
-
-  const isChord = currentLesson.type === 'chords';
-
-  if (isChord) {
-    document.getElementById('targetLabel').textContent = 'Hedef Akor';
-    document.getElementById('targetNote').textContent = item.name;
-    document.getElementById('targetOctave').textContent = '';
-    document.getElementById('targetHint').textContent = 'Aşağıdaki tuşlara aynı anda bas';
-    const chordDiv = document.getElementById('chordNotes');
-    chordDiv.innerHTML = '';
-    item.chord.forEach(n => {
-      const pill = document.createElement('span');
-      pill.className = 'chord-note-pill';
-      pill.textContent = NOTE_NAMES_TR[n.note] + n.octave;
-      chordDiv.appendChild(pill);
-      highlightKey(n.note, n.octave);
-    });
-    drawStaffChord(item.chord);
-  } else {
-    document.getElementById('targetLabel').textContent = 'Hedef Nota';
-    document.getElementById('targetNote').textContent = NOTE_NAMES_TR[item.note];
-    document.getElementById('targetOctave').textContent = `${item.note}${item.octave} — ${item.octave}. Oktav`;
-    document.getElementById('targetHint').textContent = getHint(item.note, item.octave);
-    document.getElementById('chordNotes').innerHTML = '';
-    highlightKey(item.note, item.octave);
-    drawStaffNote(item.note, item.octave);
-  }
-}
-
-function getHint(note, octave) {
-  const isBlack = note.includes('#');
-  if (octave === 4 && note === 'C') return '🎹 Orta Do — piyano klavyesinin tam ortası';
-  if (isBlack) return `Siyah tuş: ${NOTE_NAMES_TR[note]} (${note})`;
-  return `Beyaz tuş: ${NOTE_NAMES_TR[note]}`;
-}
-
-// ─────────────────────────────────────────────
-// KEY PRESS HANDLER
-// ─────────────────────────────────────────────
-function handleKeyPress(note, octave) {
-  const freq = freqOf(note, octave);
-  playNote(freq, 1.0, 0.5);
-  flashKey(note, octave, 'pressed');
-
-  if (mode === 'free') return;
-  if (!currentLesson || currentIndex >= lessonQueue.length) return;
-  if (waitingForNext) return;
-
-  const item = lessonQueue[currentIndex];
-  const isChord = currentLesson.type === 'chords';
-
-  if (isChord) {
-    pressedKeys.add(`${note}${octave}`);
-    const required = new Set(item.chord.map(n => `${n.note}${n.octave}`));
-    const hasAll = [...required].every(k => pressedKeys.has(k));
-    const hasWrong = [...pressedKeys].some(k => !required.has(k));
-
-    if (hasWrong) {
-      onWrong(note, octave);
-      pressedKeys.clear();
-    } else if (hasAll) {
-      onCorrect(note, octave);
-    }
-  } else {
-    if (note === item.note && octave === item.octave) {
-      onCorrect(note, octave);
-    } else {
-      onWrong(note, octave);
-    }
-  }
-}
-
-function onCorrect(note, octave) {
-  score += 10 + streak * 2;
-  streak++;
-  updateScoreUI();
-  flashKey(note, octave, 'correct-flash');
-  setFeedback(getCorrectMsg(), 'correct');
-  spawnFloatNote('✓', note, octave);
-  waitingForNext = true;
-  document.getElementById('nextBtn').classList.add('visible');
-
-  // Auto-advance after short delay
-  setTimeout(() => {
-    if (waitingForNext) nextNote();
-  }, 900);
-}
-
-function onWrong(note, octave) {
-  streak = 0;
-  updateScoreUI();
-  flashKey(note, octave, 'wrong-flash');
-  setFeedback(getWrongMsg(lessonQueue[currentIndex]), 'wrong');
-  spawnFloatNote('✗', note, octave);
-}
-
-function nextNote() {
-  currentIndex++;
-  showCurrentTarget();
-}
-
-function lessonComplete() {
-  document.getElementById('targetLabel').textContent = '🎉 Tebrikler!';
-  document.getElementById('targetNote').textContent = score;
-  document.getElementById('targetOctave').textContent = 'puan';
-  document.getElementById('targetHint').textContent = `${currentLesson.name} dersini tamamladın! Başka bir ders seçebilirsin.`;
-  document.getElementById('chordNotes').innerHTML = '';
-  document.getElementById('nextBtn').classList.remove('visible');
-  document.getElementById('progressBar').style.width = '100%';
-  document.getElementById('progressVal').textContent = `✓`;
-  clearStaff();
-  clearHighlights();
-  setFeedback('🌟 Harika! Ders tamamlandı.', 'correct');
-}
-
-// ─────────────────────────────────────────────
-// TARGET SOUND
-// ─────────────────────────────────────────────
-function playTargetSound() {
-  if (!currentLesson || currentIndex >= lessonQueue.length) return;
-  const item = lessonQueue[currentIndex];
-  if (currentLesson.type === 'chords') {
-    playChord(item.chord.map(n => freqOf(n.note, n.octave)));
-  } else {
-    playNote(freqOf(item.note, item.octave), 1.5, 0.55);
-  }
-}
-
-// ─────────────────────────────────────────────
-// UI HELPERS
-// ─────────────────────────────────────────────
-function setFeedback(msg, type) {
-  const el = document.getElementById('feedbackMsg');
-  el.textContent = msg;
-  el.className = 'feedback-msg ' + type;
-}
-
-function updateScoreUI() {
-  document.getElementById('scoreVal').textContent = score;
-  document.getElementById('streakVal').textContent = streak;
-}
-
-function highlightKey(note, octave) {
-  const el = document.getElementById(`key_${note}${octave}`);
-  if (el) el.classList.add('highlight');
-}
-function clearHighlights() {
-  document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
-}
-function flashKey(note, octave, cls) {
-  const el = document.getElementById(`key_${note}${octave}`);
-  if (!el) return;
-  el.classList.add(cls);
-  setTimeout(() => el.classList.remove(cls), 350);
-}
-
-function setMode(m) {
-  mode = m;
-  document.getElementById('modeListen').classList.toggle('active', m === 'listen');
-  document.getElementById('modeFree').classList.toggle('active', m === 'free');
-  if (m === 'free') setFeedback('Serbest mod — istediğini çal', 'info');
-}
-
-function getCorrectMsg() {
-  const msgs = ['Harika! 🎶','Mükemmel!','Doğru!','Süper! ✨','Bravo! 🌟','Evet, bu doğru!','Tam isabet!'];
-  return msgs[Math.floor(Math.random()*msgs.length)];
-}
-function getWrongMsg(item) {
-  if (currentLesson.type === 'chords') return `Yanlış tuş kombinasyonu. Tekrar dene!`;
-  return `Yanlış! Doğru nota: ${NOTE_NAMES_TR[item.note]}${item.note.includes('#') ? ' (siyah tuş)' : ''}`;
-}
-
-// ─────────────────────────────────────────────
-// FLOAT NOTE ANIMATION
-// ─────────────────────────────────────────────
-function spawnFloatNote(symbol, note, octave) {
-  const el = document.getElementById(`key_${note}${octave}`);
-  if (!el) return;
-  const rect = el.getBoundingClientRect();
-  const div = document.createElement('div');
-  div.className = 'float-note';
-  div.textContent = symbol;
-  div.style.left = (rect.left + rect.width/2 - 15) + 'px';
-  div.style.top = (rect.top - 10) + 'px';
-  div.style.color = symbol === '✓' ? '#27ae60' : '#c0392b';
-  document.body.appendChild(div);
-  setTimeout(() => div.remove(), 1300);
-}
-
-// ─────────────────────────────────────────────
-// STAFF (simple canvas notation)
-// ─────────────────────────────────────────────
-const STAFF_NOTES_C4 = {
-  // note+octave -> position (0 = bottom line, positive = up)
-  'C4': -2, 'D4': -1, 'E4': 0, 'F4': 1, 'G4': 2, 'A4': 3, 'B4': 4,
-  'C5': 5,  'D5': 6,  'E5': 7, 'F5': 8, 'G5': 9, 'A5': 10,'B5': 11,
-  'C3': -7, 'D3': -6, 'E3': -5,'F3': -4,'G3': -3,'A3': -2,'B3': -1,
-  'C6': 12, 'D6': 13,
+/* ─── SCORE CANVAS ─── */
+const SPOS={
+  'C3':-7,'D3':-6,'E3':-5,'F3':-4,'G3':-3,'A3':-2,'B3':-1,
+  'C4':0,'D4':1,'E4':2,'F4':3,'G4':4,'A4':5,'B4':6,
+  'C5':7,'D5':8,'E5':9,'F5':10,'G5':11,'A5':12,'B5':13,
+  'C6':14,'D6':15
 };
+function sp(n,o){const k=n.replace('#','')+o;return SPOS[k]!==undefined?SPOS[k]:0;}
 
-function drawStaffNote(note, octave) {
-  const canvas = document.getElementById('staffCanvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, 300, 100);
-
-  const lineSpacing = 10;
-  const startX = 20;
-  const baseY = 65; // bottom staff line
-
-  // Draw 5 staff lines
-  ctx.strokeStyle = 'rgba(200,169,110,0.5)';
-  ctx.lineWidth = 1;
-  for (let i = 0; i < 5; i++) {
-    ctx.beginPath();
-    ctx.moveTo(startX, baseY - i * lineSpacing);
-    ctx.lineTo(280, baseY - i * lineSpacing);
+function drawSc(){
+  const cv=document.getElementById('sc'),ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='rgba(18,20,28,.9)';ctx.fillRect(0,0,W,H);
+  const sT=22,lG=12,nL=5;
+  ctx.strokeStyle='rgba(180,150,80,.3)';ctx.lineWidth=1;
+  for(let i=0;i<nL;i++){ctx.beginPath();ctx.moveTo(28,sT+i*lG);ctx.lineTo(W-8,sT+i*lG);ctx.stroke();}
+  ctx.fillStyle='rgba(200,160,80,.65)';ctx.font='60px serif';ctx.fillText('𝄞',0,sT+nL*lG-2);
+  if(!queue.length)return;
+  const show=Math.min(queue.length,24),si=Math.max(0,qIdx-4);
+  const xS=56,xG=Math.min(34,(W-xS-10)/show);
+  const bY=sT+(nL-1)*lG;
+  for(let i=0;i<show;i++){
+    const qi=si+i;if(qi>=queue.length)break;
+    const item=queue[qi],x=xS+i*xG;
+    const pos=sp(item.n,item.o),ny=bY-pos*(lG/2);
+    // Ledger lines
+    ctx.strokeStyle='rgba(180,150,80,.35)';ctx.lineWidth=1;
+    if(ny>bY+3)for(let ly=bY+lG;ly<=ny+3;ly+=lG){ctx.beginPath();ctx.moveTo(x-8,ly);ctx.lineTo(x+8,ly);ctx.stroke();}
+    if(ny<sT-3)for(let ly=sT-lG;ly>=ny-3;ly-=lG){ctx.beginPath();ctx.moveTo(x-8,ly);ctx.lineTo(x+8,ly);ctx.stroke();}
+    let fill=qi===qIdx?'#e8c870':results[qi]==='ok'?'#2ecc71':results[qi]==='bad'?'#e74c3c':'rgba(200,180,140,.35)';
+    ctx.fillStyle=fill;
+    ctx.beginPath();ctx.ellipse(x,ny,5.5,4,-0.25,0,Math.PI*2);ctx.fill();
+    if(item.n.includes('#')){ctx.font='10px serif';ctx.fillText('♯',x-14,ny+4);}
+    ctx.strokeStyle=fill;ctx.lineWidth=1.4;ctx.beginPath();
+    if(pos>=2){ctx.moveTo(x-4.5,ny);ctx.lineTo(x-4.5,ny+26);}
+    else{ctx.moveTo(x+4.5,ny);ctx.lineTo(x+4.5,ny-26);}
     ctx.stroke();
+    ctx.fillStyle='rgba(180,150,80,.45)';ctx.font='8px Cinzel,serif';ctx.textAlign='center';
+    ctx.fillText(TR[item.n]||item.n,x,H-3);ctx.textAlign='left';
   }
-
-  // Treble clef symbol (simplified text)
-  ctx.fillStyle = 'rgba(200,169,110,0.8)';
-  ctx.font = '50px serif';
-  ctx.fillText('𝄞', startX - 5, baseY + 10);
-
-  // Note position
-  const key = note.replace('#','') + octave;
-  const sharpNote = note.includes('#') ? note.replace('#','') : null;
-  let pos = STAFF_NOTES_C4[key];
-  if (pos === undefined) pos = 0;
-
-  const noteX = 200;
-  const noteY = baseY - pos * (lineSpacing / 2);
-
-  // Ledger lines if needed
-  ctx.strokeStyle = 'rgba(200,169,110,0.5)';
-  if (noteY > baseY + 3) { // below staff
-    for (let y = baseY + lineSpacing; y <= noteY + 3; y += lineSpacing) {
-      ctx.beginPath();
-      ctx.moveTo(noteX - 12, y);
-      ctx.lineTo(noteX + 12, y);
-      ctx.stroke();
-    }
-  }
-  if (noteY < baseY - 4 * lineSpacing - 3) { // above staff
-    for (let y = baseY - 5 * lineSpacing; y >= noteY - 3; y -= lineSpacing) {
-      ctx.beginPath();
-      ctx.moveTo(noteX - 12, y);
-      ctx.lineTo(noteX + 12, y);
-      ctx.stroke();
-    }
-  }
-  // Middle C ledger
-  if (pos === -2) {
-    ctx.beginPath();
-    ctx.moveTo(noteX - 12, baseY + lineSpacing);
-    ctx.lineTo(noteX + 12, baseY + lineSpacing);
-    ctx.stroke();
-  }
-
-  // Draw note head
-  ctx.fillStyle = '#e8c98e';
-  ctx.beginPath();
-  ctx.ellipse(noteX, noteY, 7, 5.5, -0.3, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Sharp symbol
-  if (sharpNote) {
-    ctx.fillStyle = '#e8c98e';
-    ctx.font = '14px serif';
-    ctx.fillText('♯', noteX - 20, noteY + 5);
-  }
-
-  // Stem
-  ctx.strokeStyle = '#e8c98e';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  if (pos >= 2) {
-    ctx.moveTo(noteX - 6, noteY);
-    ctx.lineTo(noteX - 6, noteY + 35);
-  } else {
-    ctx.moveTo(noteX + 6, noteY);
-    ctx.lineTo(noteX + 6, noteY - 35);
-  }
-  ctx.stroke();
-
-  // Note name
-  ctx.fillStyle = 'rgba(200,169,110,0.6)';
-  ctx.font = '11px Crimson Pro, serif';
-  ctx.fillText(NOTE_NAMES_TR[note], noteX - 8, 95);
 }
 
-function drawStaffChord(chord) {
-  const canvas = document.getElementById('staffCanvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, 300, 100);
-
-  const lineSpacing = 10;
-  const startX = 20;
-  const baseY = 65;
-
-  ctx.strokeStyle = 'rgba(200,169,110,0.5)';
-  ctx.lineWidth = 1;
-  for (let i = 0; i < 5; i++) {
-    ctx.beginPath();
-    ctx.moveTo(startX, baseY - i * lineSpacing);
-    ctx.lineTo(280, baseY - i * lineSpacing);
-    ctx.stroke();
+/* ─── NOTES ROW ─── */
+function buildNrow(){
+  const row=document.getElementById('nrow');row.innerHTML='';
+  const show=Math.min(queue.length,28),start=Math.max(0,qIdx-4);
+  for(let i=start;i<start+show&&i<queue.length;i++){
+    const c=document.createElement('span');c.className='nchip';
+    if(i===qIdx)c.classList.add('cur');
+    else if(results[i]==='ok')c.classList.add('ok');
+    else if(results[i]==='bad')c.classList.add('bad');
+    c.textContent=(TR[queue[i].n]||queue[i].n)+queue[i].o;
+    row.appendChild(c);
   }
-  ctx.fillStyle = 'rgba(200,169,110,0.8)';
-  ctx.font = '50px serif';
-  ctx.fillText('𝄞', startX - 5, baseY + 10);
+}
 
-  const noteXs = [160, 175, 190];
-  chord.forEach((n, i) => {
-    const key = n.note.replace('#','') + n.octave;
-    let pos = STAFF_NOTES_C4[key];
-    if (pos === undefined) pos = 0;
-    const noteY = baseY - pos * (lineSpacing / 2);
-    const noteX = noteXs[Math.min(i, noteXs.length-1)];
-
-    ctx.fillStyle = '#e8c98e';
-    ctx.beginPath();
-    ctx.ellipse(noteX, noteY, 7, 5.5, -0.3, 0, Math.PI * 2);
-    ctx.fill();
-
-    if (n.note.includes('#')) {
-      ctx.font = '14px serif';
-      ctx.fillText('♯', noteX - 18, noteY + 5);
-    }
+/* ─── LIST ─── */
+let activeTab='lessons';
+function switchTab(t){
+  activeTab=t;
+  document.getElementById('tabA').classList.toggle('active',t==='lessons');
+  document.getElementById('tabB').classList.toggle('active',t==='pieces');
+  buildList();
+}
+function buildList(){
+  const el=document.getElementById('lst');el.innerHTML='';
+  const src=activeTab==='lessons'?LESSONS:PIECES;
+  src.forEach((item,i)=>{
+    const d=document.createElement('div');d.className='li';
+    const stars=activeTab==='pieces'?'⭐'.repeat(Math.ceil((i+1)/7)):'';
+    const sub=activeTab==='lessons'?item.sub:item.comp;
+    d.innerHTML=`<span class="li-num">${i+1}</span><div class="li-info"><div class="li-name">${item.name}</div><div class="li-sub">${sub}</div></div><span class="li-star">${stars}</span>`;
+    d.onclick=()=>selectItem(item,i,activeTab);
+    el.appendChild(d);
   });
 }
+function selectItem(item,idx,type){
+  document.querySelectorAll('.li').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.li')[idx]?.classList.add('active');
+  started=false;curType=type;curItem=item;
+  if(type==='lessons'){
+    queue=item.type==='random'?shuffle([...item.items,...item.items,...item.items]).slice(0,16):[...item.items].map(x=>({n:x.n,o:x.o,d:300}));
+  }else{
+    queue=item.notes.map(x=>({n:x.n,o:x.o,d:x.d||300}));
+  }
+  qIdx=0;results=queue.map(()=>'pending');
+  pts=0;streak=0;cor=0;wrg=0;
+  updScore();
+  document.getElementById('shTitle').textContent=item.name;
+  document.getElementById('shComp').textContent=type==='lessons'?item.sub:item.comp;
+  drawSc();buildNrow();
+  document.getElementById('pgBar').style.width='0%';
+  clearHl();if(queue.length)hlK(queue[0].n,queue[0].o);
+  setFb(type==='pieces'?'🎵':'📚','"♪ Dinle" ile önizle ya da "▶ Başlat"a bas. Mikrofona çal!','info');
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-function clearStaff() {
-  const canvas = document.getElementById('staffCanvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, 300, 100);
+/* ─── PIANO ─── */
+const SHOCTS=[3,4,5,6];
+function buildPiano(){
+  const inner=document.getElementById('pianoInner');inner.innerHTML='';
+  SHOCTS.forEach(oct=>{
+    const g=document.createElement('div');g.className='og';
+    WHITE.forEach(wn=>{
+      const k=document.createElement('div');k.className='wk';k.id='k_'+wn+oct;
+      const l=document.createElement('span');l.className='wk-lbl';l.textContent=TR[wn];k.appendChild(l);
+      k.addEventListener('mousedown',()=>onKey(wn,oct));
+      k.addEventListener('touchstart',e=>{e.preventDefault();onKey(wn,oct);},{passive:false});
+      g.appendChild(k);
+    });
+    Object.entries(BKO).forEach(([bn,pos])=>{
+      const k=document.createElement('div');k.className='bk';k.id='k_'+bn+oct;
+      k.style.left=(pos*36+36-11)+'px';
+      k.addEventListener('mousedown',()=>onKey(bn,oct));
+      k.addEventListener('touchstart',e=>{e.preventDefault();onKey(bn,oct);},{passive:false});
+      g.appendChild(k);
+    });
+    inner.appendChild(g);
+  });
+}
+function onKey(note,oct){
+  playTone(freqOf(note,oct),.85,.44);
+  flashK(note,oct,'pressed');
+  if(!started||qIdx>=queue.length)return;
+  const t=queue[qIdx];
+  if(note===t.n&&oct===t.o){lastOkTime=Date.now();doCorrect();}
+  else{lastBadTime=Date.now();doWrong({note,octave:oct});}
+}
+function hlK(n,o){const e=document.getElementById('k_'+n+o);if(e)e.classList.add('hl');}
+function clearHl(){document.querySelectorAll('.hl').forEach(e=>e.classList.remove('hl'));}
+function flashK(n,o,cls){
+  const e=document.getElementById('k_'+n+o);if(!e)return;
+  e.classList.add(cls);setTimeout(()=>e.classList.remove(cls),360);
 }
 
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
-buildLessonGrid();
+/* ─── KEYBOARD ─── */
+const KBM={a:'C',s:'D',d:'E',f:'F',g:'G',h:'A',j:'B'};
+document.addEventListener('keydown',e=>{if(!e.repeat){const n=KBM[e.key.toLowerCase()];if(n)onKey(n,4);}});
+
+/* ─── FLOAT ─── */
+function spawnFloat(sym,note,oct,color){
+  const el=document.getElementById('k_'+note+oct);if(!el)return;
+  const r=el.getBoundingClientRect();
+  const d=document.createElement('div');d.className='float-sym';d.textContent=sym;
+  d.style.color=color;d.style.left=(r.left+r.width/2-10)+'px';d.style.top=(r.top-4)+'px';
+  document.body.appendChild(d);setTimeout(()=>d.remove(),1050);
+}
+
+/* ─── FEEDBACK ─── */
+function setFb(icon,text,cls){
+  document.getElementById('fbI').textContent=icon;
+  const t=document.getElementById('fbT');t.textContent=text;t.className='fb-txt '+cls;
+}
+
+/* ─── INIT ─── */
 buildPiano();
+buildList();
 </script>
 </body>
 </html>
