@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akustik Piyano Algılayıcı - Gelişmiş DSP Sürümü</title>
+    <title>Akustik Piyano Algılayıcı - Pro Sürüm</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #050505; color: white; font-family: -apple-system, sans-serif; }
-        #ui { position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(20,20,20,0.85); padding: 20px; border-radius: 12px; border: 1px solid #333; backdrop-filter: blur(10px); width: 300px; }
-        h3 { margin-top: 0; color: #b088ff; }
-        select, button, input { width: 100%; background: #222; color: white; border: 1px solid #444; padding: 10px; margin-top: 10px; border-radius: 6px; font-size: 16px; }
-        button:hover { background: #b088ff; color: black; cursor: pointer; font-weight: bold; }
+        body { margin: 0; overflow: hidden; background-color: #0a0a0a; color: white; font-family: -apple-system, sans-serif; }
+        #ui { position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(15,15,15,0.9); padding: 20px; border-radius: 12px; border: 1px solid #333; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h3 { margin-top: 0; color: #b088ff; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        select, button, input { width: 100%; background: #222; color: white; border: 1px solid #555; padding: 12px; margin-top: 10px; border-radius: 6px; font-size: 15px; }
+        button { background: #3a2066; border: none; font-weight: bold; transition: 0.2s; }
+        button:hover { background: #b088ff; color: black; cursor: pointer; }
         #status { margin-top:15px; font-size: 14px; color: #ff5555; font-weight: bold; text-align: center; }
-        .control-group { margin-top: 15px; }
-        .control-group label { font-size: 12px; color: #aaa; }
+        .control-group { margin-top: 15px; background: #1a1a1a; padding: 10px; border-radius: 6px; border: 1px solid #333; }
+        .control-group label { font-size: 12px; color: #ccc; display: flex; justify-content: space-between; }
+        #micLevelBar { width: 0%; height: 5px; background: #00ff00; margin-top: 5px; border-radius: 3px; transition: width 0.1s; }
     </style>
 </head>
 <body>
 
     <div id="ui">
-        <h3>🎹 Parça Kütüphanesi</h3>
+        <h3>🎹 Repertuar & Kontrol</h3>
         <select id="songSelect">
             <option value="furElise">Für Elise (Beethoven)</option>
             <option value="turkishMarch">Türk Marşı (Mozart)</option>
@@ -32,12 +34,20 @@
             <option value="nuvole">Nuvole Bianche (Einaudi)</option>
         </select>
         
-        <button id="startMicBtn" onclick="initAudio()">🎙️ Mikrofonu Dinlemeye Başla</button>
-        <button onclick="startSong()">▶️ Şeridi Başlat</button>
+        <button id="startMicBtn" onclick="initAudio()">🎙️ Mikrofonu Aktifleştir</button>
+        <button onclick="startSong()">▶️ Parçayı Başlat</button>
         
         <div class="control-group">
-            <label>Mikrofon Hassasiyeti: <span id="sensValue">200</span></label>
-            <input type="range" id="sensitivity" min="50" max="250" value="200" oninput="updateSensitivity(this.value)">
+            <label><span>Gürültü Eşiği (Noise Gate)</span> <span id="sensValue">180</span></label>
+            <input type="range" id="sensitivity" min="50" max="250" value="180" oninput="updateSensitivity(this.value)">
+            <div style="font-size: 10px; color: #777; margin-top: 5px;">Piyano çalmıyorken ışık yanıyorsa bu değeri artırın.</div>
+        </div>
+        
+        <div class="control-group" style="padding-bottom: 15px;">
+            <label>Mikrofon Ses Seviyesi</label>
+            <div style="width: 100%; height: 5px; background: #333; margin-top: 5px; border-radius: 3px;">
+                <div id="micLevelBar"></div>
+            </div>
         </div>
 
         <div id="status">Mikrofon izni bekleniyor...</div>
@@ -51,37 +61,77 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // --- SES İŞLEME VE MİKROFON DEĞİŞKENLERİ ---
     let audioCtx, analyser, dataArray;
     let isListening = false;
-    let sensitivityThreshold = 200; // Frekans tepe noktası filtresi
+    let sensitivityThreshold = 180; 
+    let activeNotes = {}; 
+    let noteDecayBuffer = {}; // Notaların anında sönüp titrememesi için tampon bellek
     
-    // Piyano Çizim Ayarları (A0'dan C8'e 88 tuş, ortayı gösteriyoruz)
-    const startKey = 40; // E2 civarı
-    const endKey = 80;   // G5 civarı
+    // Piyano Çizim Ayarları (E2 - G5)
+    const startKey = 40; 
+    const endKey = 80;   
     const totalVisibleWhiteKeys = 24;
     const whiteKeyWidth = canvas.width / totalVisibleWhiteKeys;
     const whiteKeyHeight = 180;
     const blackKeyWidth = whiteKeyWidth * 0.55;
     const blackKeyHeight = 110;
     
-    let activeNotes = {}; 
     let songTime = 0;
     let isPlaying = false;
-    let speed = 120; // Düşme hızı
+    let speed = 150; // Düşme hızı (artırıldı)
 
-    // İstenilen 10 Eserin Şablonları (MIDI Note, Başlangıç Saniyesi, Süre)
+    // Genişletilmiş Şarkı Kütüphanesi
     const songLibrary = {
-        furElise: [{pitch:76, start:0, duration:0.4}, {pitch:75, start:0.4, duration:0.4}, {pitch:76, start:0.8, duration:0.4}, {pitch:75, start:1.2, duration:0.4}, {pitch:76, start:1.6, duration:0.4}, {pitch:71, start:2.0, duration:0.4}, {pitch:74, start:2.4, duration:0.4}, {pitch:72, start:2.8, duration:0.4}, {pitch:69, start:3.2, duration:1.0}],
-        turkishMarch: [{pitch:71, start:0, duration:0.2}, {pitch:72, start:0.2, duration:0.2}, {pitch:74, start:0.4, duration:0.4}, {pitch:69, start:0.8, duration:0.4}],
-        interstellar: [{pitch:64, start:0, duration:1.5}, {pitch:69, start:0.5, duration:1.0}, {pitch:71, start:1.5, duration:1.5}, {pitch:76, start:2.5, duration:1.5}],
-        moonlight: [{pitch:68, start:0, duration:0.8}, {pitch:61, start:0, duration:2.4}, {pitch:64, start:0, duration:2.4}, {pitch:68, start:0.8, duration:0.8}],
-        prelude: [{pitch:60, start:0, duration:0.3}, {pitch:64, start:0.3, duration:0.3}, {pitch:67, start:0.6, duration:0.3}, {pitch:72, start:0.9, duration:0.3}, {pitch:76, start:1.2, duration:0.6}],
-        minuet: [{pitch:74, start:0, duration:0.5}, {pitch:67, start:0.5, duration:0.25}, {pitch:69, start:0.75, duration:0.25}, {pitch:71, start:1.0, duration:0.25}, {pitch:72, start:1.25, duration:0.25}],
-        gymnopedie: [{pitch:66, start:0, duration:1.5}, {pitch:71, start:1.5, duration:1.5}, {pitch:69, start:3.0, duration:1.5}],
-        canon: [{pitch:74, start:0, duration:1.0}, {pitch:73, start:1.0, duration:1.0}, {pitch:71, start:2.0, duration:1.0}, {pitch:69, start:3.0, duration:1.0}],
-        river: [{pitch:78, start:0, duration:0.5}, {pitch:76, start:0.5, duration:0.5}, {pitch:78, start:1.0, duration:0.5}, {pitch:76, start:1.5, duration:0.5}],
-        nuvole: [{pitch:68, start:0, duration:1.0}, {pitch:63, start:1.0, duration:1.0}, {pitch:60, start:2.0, duration:1.0}]
+        furElise: [
+            {pitch:76, start:0, duration:0.4}, {pitch:75, start:0.4, duration:0.4}, {pitch:76, start:0.8, duration:0.4}, {pitch:75, start:1.2, duration:0.4}, 
+            {pitch:76, start:1.6, duration:0.4}, {pitch:71, start:2.0, duration:0.4}, {pitch:74, start:2.4, duration:0.4}, {pitch:72, start:2.8, duration:0.4}, 
+            {pitch:69, start:3.2, duration:1.0}, {pitch:60, start:4.2, duration:0.4}, {pitch:64, start:4.6, duration:0.4}, {pitch:69, start:5.0, duration:0.4},
+            {pitch:71, start:5.4, duration:1.0}, {pitch:64, start:6.4, duration:0.4}, {pitch:68, start:6.8, duration:0.4}, {pitch:71, start:7.2, duration:0.4},
+            {pitch:72, start:7.6, duration:1.0}
+        ],
+        turkishMarch: [
+            {pitch:71, start:0, duration:0.25}, {pitch:72, start:0.25, duration:0.25}, {pitch:74, start:0.5, duration:0.5}, {pitch:69, start:1.0, duration:0.5},
+            {pitch:68, start:1.5, duration:0.25}, {pitch:69, start:1.75, duration:0.25}, {pitch:71, start:2.0, duration:0.5}, {pitch:66, start:2.5, duration:0.5},
+            {pitch:65, start:3.0, duration:0.25}, {pitch:66, start:3.25, duration:0.25}, {pitch:68, start:3.5, duration:0.5}, {pitch:62, start:4.0, duration:0.5},
+            {pitch:69, start:4.5, duration:0.25}, {pitch:68, start:4.75, duration:0.25}, {pitch:69, start:5.0, duration:0.25}, {pitch:71, start:5.25, duration:0.25},
+            {pitch:72, start:5.5, duration:0.25}, {pitch:74, start:5.75, duration:0.25}, {pitch:76, start:6.0, duration:0.5}
+        ],
+        interstellar: [
+            {pitch:64, start:0, duration:1.5}, {pitch:69, start:0.5, duration:1.0}, {pitch:71, start:1.5, duration:1.5}, {pitch:69, start:2.0, duration:1.0},
+            {pitch:64, start:3.0, duration:1.5}, {pitch:69, start:3.5, duration:1.0}, {pitch:72, start:4.5, duration:1.5}, {pitch:71, start:5.0, duration:1.0},
+            {pitch:64, start:6.0, duration:1.5}, {pitch:69, start:6.5, duration:1.0}, {pitch:74, start:7.5, duration:1.5}, {pitch:72, start:8.0, duration:1.0}
+        ],
+        moonlight: [
+            {pitch:68, start:0, duration:0.6}, {pitch:61, start:0, duration:1.8}, {pitch:64, start:0.6, duration:0.6}, {pitch:68, start:1.2, duration:0.6},
+            {pitch:61, start:1.8, duration:1.8}, {pitch:64, start:1.8, duration:0.6}, {pitch:68, start:2.4, duration:0.6}, {pitch:69, start:3.0, duration:0.6},
+            {pitch:61, start:3.6, duration:1.8}, {pitch:64, start:3.6, duration:0.6}, {pitch:69, start:4.2, duration:0.6}, {pitch:68, start:4.8, duration:1.8}
+        ],
+        prelude: [
+            {pitch:60, start:0, duration:0.25}, {pitch:64, start:0.25, duration:0.25}, {pitch:67, start:0.5, duration:0.25}, {pitch:72, start:0.75, duration:0.25}, {pitch:76, start:1.0, duration:0.5},
+            {pitch:60, start:1.5, duration:0.25}, {pitch:64, start:1.75, duration:0.25}, {pitch:67, start:2.0, duration:0.25}, {pitch:72, start:2.25, duration:0.25}, {pitch:76, start:2.5, duration:0.5}
+        ],
+        minuet: [
+            {pitch:74, start:0, duration:0.5}, {pitch:67, start:0.5, duration:0.25}, {pitch:69, start:0.75, duration:0.25}, {pitch:71, start:1.0, duration:0.25}, {pitch:72, start:1.25, duration:0.25},
+            {pitch:74, start:1.5, duration:0.5}, {pitch:67, start:2.0, duration:0.5}, {pitch:67, start:2.5, duration:0.5}, {pitch:76, start:3.0, duration:0.5}, {pitch:74, start:3.5, duration:0.25},
+            {pitch:72, start:3.75, duration:0.25}, {pitch:71, start:4.0, duration:0.25}, {pitch:69, start:4.25, duration:0.25}
+        ],
+        gymnopedie: [
+            {pitch:66, start:0, duration:1.5}, {pitch:71, start:1.5, duration:1.5}, {pitch:69, start:3.0, duration:1.5}, {pitch:66, start:4.5, duration:1.5},
+            {pitch:64, start:6.0, duration:1.5}, {pitch:66, start:7.5, duration:1.5}, {pitch:62, start:9.0, duration:3.0}
+        ],
+        canon: [
+            {pitch:74, start:0, duration:1.0}, {pitch:73, start:1.0, duration:1.0}, {pitch:71, start:2.0, duration:1.0}, {pitch:69, start:3.0, duration:1.0},
+            {pitch:67, start:4.0, duration:1.0}, {pitch:66, start:5.0, duration:1.0}, {pitch:67, start:6.0, duration:1.0}, {pitch:69, start:7.0, duration:1.0}
+        ],
+        river: [
+            {pitch:78, start:0, duration:0.5}, {pitch:76, start:0.5, duration:0.5}, {pitch:78, start:1.0, duration:0.5}, {pitch:76, start:1.5, duration:0.5},
+            {pitch:78, start:2.0, duration:0.5}, {pitch:71, start:2.5, duration:0.5}, {pitch:74, start:3.0, duration:0.5}, {pitch:73, start:3.5, duration:0.5},
+            {pitch:69, start:4.0, duration:2.0}
+        ],
+        nuvole: [
+            {pitch:68, start:0, duration:1.0}, {pitch:63, start:1.0, duration:1.0}, {pitch:60, start:2.0, duration:1.0}, {pitch:63, start:3.0, duration:1.0},
+            {pitch:68, start:4.0, duration:1.0}, {pitch:63, start:5.0, duration:1.0}, {pitch:60, start:6.0, duration:1.0}, {pitch:63, start:7.0, duration:1.0}
+        ]
     };
     let currentSong = [];
 
@@ -90,77 +140,98 @@
         document.getElementById('sensValue').innerText = val;
     }
 
-    // --- GELİŞMİŞ SES DİNLEME VE FFT ANALİZİ ---
+    // --- GELİŞTİRİLMİŞ DSP MOTORU ---
     async function initAudio() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
-            
-            // iPad uyumlu AudioContext başlatma
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioCtx.createAnalyser();
-            
-            // Çözünürlüğü maksimuma çıkarıyoruz (16384). Bu, notaları birbirinden ayırmak için kritik.
             analyser.fftSize = 16384; 
             const source = audioCtx.createMediaStreamSource(stream);
             source.connect(analyser);
-            
             dataArray = new Uint8Array(analyser.frequencyBinCount);
             isListening = true;
             
-            document.getElementById('status').innerText = "🎙️ Dinliyor...";
+            document.getElementById('status').innerText = "🎙️ Kawai CX-101 Dinleniyor...";
             document.getElementById('status').style.color = "#00ff00";
             document.getElementById('startMicBtn').style.display = "none";
             
-            detectPitch(); // Analiz döngüsünü başlat
+            detectPitch(); 
         } catch (err) {
             document.getElementById('status').innerText = "Mikrofon izni reddedildi!";
-            console.error(err);
         }
     }
 
-    // Frekansı MIDI notasına çeviren matematiksel formül
-    function freqToMidi(freq) {
-        return Math.round(69 + 12 * Math.log2(freq / 440));
-    }
+    function freqToMidi(freq) { return Math.round(69 + 12 * Math.log2(freq / 440)); }
 
-    // Gerçek Zamanlı Tepe Noktası (Peak) Analizi
     function detectPitch() {
         if (!isListening) return;
         requestAnimationFrame(detectPitch);
-        
         analyser.getByteFrequencyData(dataArray);
         let nyquist = audioCtx.sampleRate / 2;
-        let activeThisFrame = {};
+        
+        // Mikrofon ses seviyesi görselleştirmesi (UI için)
+        let sum = 0;
+        for(let i = 0; i < 500; i++) sum += dataArray[i];
+        let average = sum / 500;
+        document.getElementById('micLevelBar').style.width = Math.min(100, (average / 255) * 150) + "%";
 
-        // Sesi tarayıp pik (zirve) yapan frekansları buluyoruz
+        // Gelişmiş Tepe Noktası ve Harmonik Filtresi
+        let peaks = [];
         for (let i = 1; i < dataArray.length - 1; i++) {
             let val = dataArray[i];
-            
-            // Eğer frekans gücü bizim eşik değerimizin üzerindeyse ve bir "tepe" noktasıysa
             if (val > sensitivityThreshold && val > dataArray[i-1] && val > dataArray[i+1]) {
-                let freq = i * (nyquist / dataArray.length);
-                if (freq > 20 && freq < 4000) { // Sadece piyano aralığındaki sesler
-                    let midiNote = freqToMidi(freq);
-                    activeThisFrame[midiNote] = true;
-                }
+                peaks.push({ freq: i * (nyquist / dataArray.length), amp: val });
             }
         }
 
-        // Ekranda sadece o an duyulan notaları yak
-        activeNotes = activeThisFrame;
+        // Güce göre sırala
+        peaks.sort((a, b) => b.amp - a.amp);
+
+        let activeThisFrame = {};
+        let fundamentals = [];
+
+        for (let p of peaks) {
+            let isHarmonic = false;
+            // Diğer güçlü frekansların katı (yankısı) olup olmadığını kontrol et
+            for (let f of fundamentals) {
+                let ratio = p.freq / f.freq;
+                // Eğer frekans oranları tam sayıya (2x, 3x, 4x) çok yakınsa, bu bir harmoniktir, nota değildir!
+                if (Math.abs(ratio - Math.round(ratio)) < 0.04) {
+                    isHarmonic = true;
+                    break;
+                }
+            }
+            if (!isHarmonic && p.freq > 25 && p.freq < 4200) {
+                fundamentals.push(p);
+                let midiNote = freqToMidi(p.freq);
+                activeThisFrame[midiNote] = true;
+                noteDecayBuffer[midiNote] = 10; // 10 frame boyunca notayı "basılı" tut (titremeyi önler)
+            }
+        }
+
+        // Buffer Yönetimi (Notaların yumuşak sönümlenmesi)
+        activeNotes = {};
+        for (let note in noteDecayBuffer) {
+            if (noteDecayBuffer[note] > 0) {
+                activeNotes[note] = true;
+                if (!activeThisFrame[note]) {
+                    noteDecayBuffer[note]--; // Eğer bu frame'de duyulmadıysa sayacı azalt
+                } else {
+                    noteDecayBuffer[note] = 10; // Duyulduysa sayacı sıfırla
+                }
+            }
+        }
     }
 
-    // --- GÖRSELLEŞTİRME MOTORU ---
+    // --- GÖRSELLEŞTİRME ---
     function drawPiano() {
         let whiteIndex = 0;
-        
         for (let i = startKey; i <= endKey; i++) {
             let isBlack = [1, 3, 6, 8, 10].includes(i % 12);
             if (!isBlack) {
                 let x = whiteIndex * whiteKeyWidth;
                 let y = canvas.height - whiteKeyHeight;
-                
-                // Basılıysa Parlak Mor, değilse Beyaz
                 ctx.fillStyle = activeNotes[i] ? '#b088ff' : '#f4f4f4'; 
                 ctx.fillRect(x, y, whiteKeyWidth - 1, whiteKeyHeight);
                 ctx.strokeStyle = '#000';
@@ -175,12 +246,8 @@
             if (isBlack) {
                 let x = (whiteIndex * whiteKeyWidth) - (blackKeyWidth / 2);
                 let y = canvas.height - whiteKeyHeight;
-                
-                // Basılıysa Elektrik Moru, değilse Siyah
                 ctx.fillStyle = activeNotes[i] ? '#8a2be2' : '#111'; 
                 ctx.fillRect(x, y, blackKeyWidth, blackKeyHeight);
-                
-                // 3D Hissi için gölge
                 ctx.fillStyle = activeNotes[i] ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)';
                 ctx.fillRect(x + 2, y + 2, blackKeyWidth - 4, blackKeyHeight - 20);
             } else {
@@ -197,36 +264,31 @@
             if (yPos + noteHeight > 0 && yPos < canvas.height) {
                 let xPos = 0;
                 let isBlack = [1, 3, 6, 8, 10].includes(note.pitch % 12);
-                
                 let wIndex = 0;
                 for(let i=startKey; i<note.pitch; i++) {
                     if(![1, 3, 6, 8, 10].includes(i % 12)) wIndex++;
                 }
 
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 10;
                 ctx.shadowColor = '#b088ff';
 
                 if(isBlack) {
                     xPos = (wIndex * whiteKeyWidth) - (blackKeyWidth / 2);
                     ctx.fillStyle = 'rgba(138, 43, 226, 0.9)'; 
-                    ctx.fillRect(xPos, yPos - noteHeight, blackKeyWidth, noteHeight);
+                    ctx.fillRect(xPos, yPos - noteHeight, blackKeyWidth, Math.max(10, noteHeight - 2));
                 } else {
                     xPos = wIndex * whiteKeyWidth;
                     ctx.fillStyle = 'rgba(176, 136, 255, 0.9)'; 
-                    ctx.fillRect(xPos, yPos - noteHeight, whiteKeyWidth - 2, noteHeight);
+                    ctx.fillRect(xPos, yPos - noteHeight, whiteKeyWidth - 2, Math.max(10, noteHeight - 2));
                 }
-                ctx.shadowBlur = 0; // Performans için gölgeyi sıfırla
+                ctx.shadowBlur = 0; 
             }
         });
     }
 
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        if (isPlaying) {
-            songTime += 0.016; 
-        }
-
+        if (isPlaying) songTime += 0.016; 
         drawFallingNotes();
         drawPiano();
         requestAnimationFrame(animate);
@@ -235,17 +297,15 @@
     function startSong() {
         let selection = document.getElementById('songSelect').value;
         currentSong = songLibrary[selection];
-        songTime = -2; // Notalar yukarıdan süzülsün diye 2 saniye avans
+        songTime = -2; 
         isPlaying = true;
     }
 
     animate();
-
     window.addEventListener('resize', () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
     });
-
 </script>
 </body>
 </html>
